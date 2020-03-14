@@ -1,0 +1,30 @@
+# correlation
+
+getwd()
+setwd("D:/02.온평원/03. 이러닝운영/03. 운영실적/운영실적(상관분석)")
+
+mydata <- read.csv("correlation.csv")
+
+dim(mydata)
+head(mydata)
+head(mydata, 20)
+
+# column delete
+library(dplyr)
+mydata <- mydata[-c(20:25)]
+head(mydata, 20)
+
+mean(mydata$과정, na.rm=TRUE)
+mean(mydata$콘탠츠, na.rm=TRUE)
+mean(mydata$교강사, na.rm=TRUE)
+mean(mydata$운영자, na.rm=TRUE)
+mean(mydata$시스템, na.rm=TRUE)
+
+mydata$평균 <- rowMeans(mydata[, c(15:19)], na.rm=TRUE, dims=1)
+
+write.csv(mydata, file='mydata.csv', row.names=FALSE)
+
+# 엑셀에서 정제해서 다시 mydata.csv로 저장
+
+
+                  
