@@ -26,5 +26,178 @@ write.csv(mydata, file='mydata.csv', row.names=FALSE)
 
 # 엑셀에서 정제해서 다시 mydata.csv로 저장
 
+mydata <- read.csv("mydata.csv", header = TRUE)
+mydata                  
 
-                  
+names(mydata)
+summary(mydata)
+
+# graph
+library(ggplot2)
+
+# DevYear
+table(mydata$DevYear)
+barplot(table(mydata$DevYear))
+
+# Field
+table(mydata$Field)
+barplot(table(mydata$Field))
+
+# ContentType
+table(mydata$ContentType)
+barplot(table(mydata$ContentType))
+
+# LectureType
+table(mydata$LectureType)
+barplot(table(mydata$LectureType))
+
+# Lesson
+table(mydata$Lesson)
+barplot(table(mydata$Lesson))
+
+# LecturePop
+boxplot(mydata$LecturePop)
+hist(mydata$LecturePop, breaks=100)
+plot(density(mydata$LecturePop))
+polygon(density(mydata$LecturePop), col='skyblue', border="deepskyblue3")
+mydata$LecturePop_interval <- ifelse(mydata$LecturePop < 100, '100 under',
+                              ifelse(mydata$LecturePop < 200, '100~200',
+                              ifelse(mydata$LecturePop < 300, '200~300',
+                              ifelse(mydata$LecturePop < 400, '300~400',
+                              ifelse(mydata$LecturePop < 500, '400~500', '500 upper')))))
+
+table(mydata$LecturePop_interval)
+barplot(table(mydata$LecturePop_interval))
+
+# CompletePop
+boxplot(mydata$CompletePop)
+hist(mydata$CompletePop, breaks=100)
+plot(density(mydata$CompletePop))
+polygon(density(mydata$CompletePop), col='skyblue', border="deepskyblue3")
+mydata$CompletePop_interval <- ifelse(mydata$CompletePop < 100, '100 under',
+                               ifelse(mydata$CompletePop < 200, '100~200',
+                               ifelse(mydata$CompletePop < 300, '200~300',
+                               ifelse(mydata$CompletePop < 400, '300~400',
+                               ifelse(mydata$CompletePop < 500, '400~500', '500 upper')))))
+
+table(mydata$CompletePop_interval)
+barplot(table(mydata$CompletePop_interval))
+
+# LCRate
+boxplot(mydata$LCRate)
+hist(mydata$LCRate, breaks=50)
+mydata$LCRate_interval <- ifelse(mydata$LCRate < 0.2, '20% under',
+                          ifelse(mydata$LCRate < 0.3, '20%~30%',
+                          ifelse(mydata$LCRate < 0.4, '30%~40%',
+                          ifelse(mydata$LCRate < 0.5, '40%~50%',
+                          ifelse(mydata$LCRate < 0.6, '50%~60%', '60% upper')))))
+
+table(mydata$LCRate_interval)
+barplot(table(mydata$LCRate_interval))
+
+# LecturerPower
+NA
+is.na(mydata$LecturerPower)
+sum(is.na(mydata$LecturerPower))
+mean(mydata$LecturerPower, na.rm=TRUE)
+table(mydata$LecturerPower)
+barplot(table(mydata$LecturerPower))
+
+# ContentPower
+NA
+is.na(mydata$ContentPower)
+sum(is.na(mydata$ContentPower))
+mean(mydata$ContentPower, na.rm=TRUE)
+table(mydata$ContentPower)
+barplot(table(mydata$ContentPower))
+
+# rename
+library(dplyr)
+mydata <- rename(mydata, "SatLecturer"="SatLecurer")
+
+# SatOperation
+sum(is.na(mydata$SatOperation))
+mean(mydata$SatOperation, na.rm=TRUE)
+table(mydata$SatOperation)
+barplot(table(mydata$SatOperation))
+
+# SatContent
+sum(is.na(mydata$SatContent))
+mean(mydata$SatContent, na.rm=TRUE)
+table(mydata$SatContent)
+barplot(table(mydata$SatContent))
+
+# SatLecturer
+sum(is.na(mydata$SatLecturer))
+mean(mydata$SatLecturer, na.rm=TRUE)
+table(mydata$SatLecturer)
+barplot(table(mydata$SatLecturer))
+
+# SatService
+sum(is.na(mydata$SatService))
+mean(mydata$SatService, na.rm=TRUE)
+table(mydata$SatService)
+barplot(table(mydata$SatService))
+
+# SatSystem
+sum(is.na(mydata$SatSystem))
+mean(mydata$SatSystem, na.rm=TRUE)
+table(mydata$SatSystem)
+barplot(table(mydata$SatSystem))
+
+# SatMean
+sum(is.na(mydata$SatMean))
+mean(mydata$SatMean, na.rm=TRUE)
+table(mydata$SatMean)
+barplot(table(mydata$SatMean))
+
+# edit save
+write.csv(mydata, file='mydata.csv', row.names=FALSE)
+
+# correlation analysis
+# plot
+plot(mydata$SatMean ~ mydata$DevYear)
+plot(mydata$SatMean ~ mydata$Field)
+plot(mydata$SatMean ~ mydata$ContentType)
+plot(mydata$SatMean ~ mydata$LectureType)
+plot(mydata$SatMean ~ mydata$Lesson)
+plot(mydata$SatMean ~ as.factor(mydata$LecturePop_interval))
+plot(mydata$SatMean ~ as.factor(mydata$CompletePop_interval))
+plot(mydata$SatMean ~ as.factor(mydata$LCRate_interval))
+plot(mydata$SatMean ~ mydata$LecturerPower)
+plot(mydata$SatMean ~ mydata$ContentPower)
+
+# covariance
+with(mydata, cov(x=DevYear, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cov(x=Lesson, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cov(x=LecturerPower, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cov(x=ContentPower, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cov(x=SatOperation, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cov(x=SatContent, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cov(x=SatLecturer, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cov(x=SatService, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cov(x=SatSystem, y=SatMean, use="complete.obs", method=c("pearson")))
+
+# correlation
+with(mydata, cor(x=DevYear, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cor(x=Lesson, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cor(x=LecturerPower, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cor(x=ContentPower, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cor(x=SatOperation, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cor(x=SatContent, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cor(x=SatLecturer, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cor(x=SatService, y=SatMean, use="complete.obs", method=c("pearson")))
+with(mydata, cor(x=SatSystem, y=SatMean, use="complete.obs", method=c("pearson")))
+
+# pairs
+pairs(SatMean ~ SatOperation+SatContent+SatLecturer+SatService+SatSystem, data=mydata)
+
+# ggpairs
+install.packages("GGally")
+library(GGally)
+
+mydata2 <- mydata %>% 
+           select(SatMean, SatOperation, SatContent, SatLecturer, SatService, SatSystem)
+
+ggpairs(mydata2, method=c("everything", "pearson"))
+
