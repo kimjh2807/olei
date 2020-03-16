@@ -25,6 +25,7 @@ mydata$평균 <- rowMeans(mydata[, c(15:19)], na.rm=TRUE, dims=1)
 write.csv(mydata, file='mydata.csv', row.names=FALSE)
 
 # 엑셀에서 정제해서 다시 mydata.csv로 저장
+# 아래에서 정제해서 다시 mydata.csv로 저장
 
 mydata <- read.csv("mydata.csv", header = TRUE)
 mydata                  
@@ -34,6 +35,7 @@ summary(mydata)
 
 # graph
 library(ggplot2)
+library(dplyr)
 
 # DevYear
 table(mydata$DevYear)
@@ -178,7 +180,7 @@ with(mydata, cov(x=SatLecturer, y=SatMean, use="complete.obs", method=c("pearson
 with(mydata, cov(x=SatService, y=SatMean, use="complete.obs", method=c("pearson")))
 with(mydata, cov(x=SatSystem, y=SatMean, use="complete.obs", method=c("pearson")))
 
-# correlation
+# correlation coefficient
 with(mydata, cor(x=DevYear, y=SatMean, use="complete.obs", method=c("pearson")))
 with(mydata, cor(x=Lesson, y=SatMean, use="complete.obs", method=c("pearson")))
 with(mydata, cor(x=LecturerPower, y=SatMean, use="complete.obs", method=c("pearson")))
@@ -188,6 +190,17 @@ with(mydata, cor(x=SatContent, y=SatMean, use="complete.obs", method=c("pearson"
 with(mydata, cor(x=SatLecturer, y=SatMean, use="complete.obs", method=c("pearson")))
 with(mydata, cor(x=SatService, y=SatMean, use="complete.obs", method=c("pearson")))
 with(mydata, cor(x=SatSystem, y=SatMean, use="complete.obs", method=c("pearson")))
+
+# correlation coefficient test
+with(mydata, cor.test(DevYear, SatMean))
+with(mydata, cor.test(Lesson, SatMean))
+with(mydata, cor.test(LecturerPower, SatMean))
+with(mydata, cor.test(ContentPower, SatMean))
+with(mydata, cor.test(SatOperation, SatMean))
+with(mydata, cor.test(SatContent, SatMean))
+with(mydata, cor.test(SatLecturer, SatMean))
+with(mydata, cor.test(SatService, SatMean))
+with(mydata, cor.test(SatSystem, SatMean))
 
 # pairs
 pairs(SatMean ~ SatOperation+SatContent+SatLecturer+SatService+SatSystem, data=mydata)
@@ -200,4 +213,26 @@ mydata2 <- mydata %>%
            select(SatMean, SatOperation, SatContent, SatLecturer, SatService, SatSystem)
 
 ggpairs(mydata2, method=c("everything", "pearson"))
+pairs(mydata2, upper.panel=NULL)
 
+# pairs.panel
+library(psych)
+pairs.panels(mydata2)
+
+# coplot
+coplot(SatMean ~ Field | LecturePop_interval, data=mydata)
+
+# regression analysis
+mydata.lm <- lm(SatMean ~ LCRate, data=mydata)
+#lm(SatMean ~ LCRate, data=mydata, subset=(LCRate > 0.8))
+
+coef(mydata.lm)
+confint(mydata.lm)
+summary(mydata.lm)
+
+mydata.lm.summary <- summary(mydata.lm)
+coef(mydata.lm.summary)
+
+anova(mydata.lm)
+
+# end
