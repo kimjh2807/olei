@@ -24,6 +24,10 @@ mydata$평균 <- rowMeans(mydata[, c(15:19)], na.rm=TRUE, dims=1)
 
 write.csv(mydata, file='mydata.csv', row.names=FALSE)
 
+# miss spelling rename
+library(dplyr)
+mydata <- rename(mydata, "SatLecturer"="SatLecurer")
+
 # 엑셀에서 정제해서 다시 mydata.csv로 저장
 # 아래에서 정제해서 다시 mydata.csv로 저장
 
@@ -103,7 +107,9 @@ is.na(mydata$LecturerPower)
 sum(is.na(mydata$LecturerPower))
 mean(mydata$LecturerPower, na.rm=TRUE)
 table(mydata$LecturerPower)
+plot(mydata$LecturerPower)
 barplot(table(mydata$LecturerPower))
+boxplot(mydata$LecturerPower)
 
 # ContentPower
 NA
@@ -111,11 +117,53 @@ is.na(mydata$ContentPower)
 sum(is.na(mydata$ContentPower))
 mean(mydata$ContentPower, na.rm=TRUE)
 table(mydata$ContentPower)
+plot(mydata$ContentPower)
 barplot(table(mydata$ContentPower))
+boxplot(mydata$ContentPower)
 
-# rename
-library(dplyr)
-mydata <- rename(mydata, "SatLecturer"="SatLecurer")
+# t.test
+t.test(mydata$LecturerPower, mydata$ContentPower)
+
+# one-way ANOVA (Analysis of Variance) LecturePop
+# homogeneity of variance test
+install.packages("lawstat")
+library(lawstat) # or library(car)
+
+# LecturerPower - LecturePop, CompletePop
+# Normality test
+shapiro.test(mydata$LecturePop)
+hist(mydata$LecturePop, breaks=100)
+qqnorm(mydata$LecturePop)
+qqline(mydata$LecturePop)
+LL.aov <- aov(LecturePop ~ as.factor(LecturerPower), data=mydata)
+levene.test(mydata$LecturePop, mydata$LecturerPower, location="mean")
+summary(LL.aov)
+TukeyHSD(LL.aov)
+par(mfrow=c(2,2))
+plot(LL.aov)
+
+shapiro.test(mydata$CompletePop)
+hist(mydata$CompletePop, breaks=100)
+qqnorm(mydata$CompletePop)
+qqline(mydata$CompletePop)
+LC.aov <- aov(CompletePop ~ as.factor(LecturerPower), data=mydata)
+levene.test(mydata$CompletePop, mydata$LecturerPower, location="mean")
+summary(LC.aov)
+TukeyHSD(LC.aov)
+plot(LC.aov)
+
+# ContentPower - LecturePop, CompletePop
+CL.aov <- aov(LecturePop ~ as.factor(ContentPower), data=mydata)
+levene.test(mydata$LecturePop, mydata$ContentPower, location="mean")
+summary(CL.aov)
+TukeyHSD(CL.aov)
+plot(CL.aov)
+
+CC.aov <- aov(CompletePop ~ as.factor(ContentPower), data=mydata)
+levene.test(mydata$CompletePop, mydata$ContentPower, location="mean")
+summary(CC.aov)
+TukeyHSD(CC.aov)
+plot(CC.aov)
 
 # SatOperation
 sum(is.na(mydata$SatOperation))
@@ -158,6 +206,19 @@ write.csv(mydata, file='mydata.csv', row.names=FALSE)
 
 # correlation analysis
 # plot
+plot(mydata$LecturePop ~ mydata$LecturerPower)
+
+mydata %>%
+  ggplot(aes(x=LecturePop)) +
+  geom_histogram() +
+  facet_wrap(~ LecturerPower)
+
+plot(round(aggregate(mydata[, 9], list(mydata$LecturerPower), mean, na.rm=TRUE), 1))
+
+mydata %>%
+  group_by(LecturerPower) %>%
+  summarise_at(vars(LecturePop), funs(mean(., na.rm=TRUE)))
+
 plot(mydata$SatMean ~ mydata$DevYear)
 plot(mydata$SatMean ~ mydata$Field)
 plot(mydata$SatMean ~ mydata$ContentType)
@@ -236,3 +297,4 @@ coef(mydata.lm.summary)
 anova(mydata.lm)
 
 # end
+
