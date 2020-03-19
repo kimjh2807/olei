@@ -361,8 +361,10 @@ abline(CP.lm, col="blue")
 plot(CP.lm)
 confint(CP.lm)
 summary(CP.lm)
-mydata.lm.summary <- summary(mydata.lm)
-coef(mydata.lm.summary)
-anova(mydata.lm)
+CP.lm.summary <- summary(CP.lm)
+coef(CP.lm.summary)
+anova(CP.lm)
+
+# end
 
 # end
