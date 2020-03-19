@@ -3,6 +3,7 @@
 getwd()
 setwd("D:/02.온평원/03. 이러닝운영/03. 운영실적/운영실적(상관분석)")
 
+# raw data
 mydata <- read.csv("correlation.csv")
 
 dim(mydata)
@@ -31,6 +32,7 @@ mydata <- rename(mydata, "SatLecturer"="SatLecurer")
 # 엑셀에서 정제해서 다시 mydata.csv로 저장
 # 아래에서 정제해서 다시 mydata.csv로 저장
 
+# refined data
 mydata <- read.csv("mydata.csv", header = TRUE)
 mydata                  
 
@@ -124,24 +126,65 @@ boxplot(mydata$ContentPower)
 # t.test
 t.test(mydata$LecturerPower, mydata$ContentPower)
 
+# levene.test
+install.packages("lawstat")
+library(lawstat)
+#or
+library(car)
+
 # one-way ANOVA (Analysis of Variance) LecturePop
 # homogeneity of variance test
-install.packages("lawstat")
-library(lawstat) # or library(car)
-
-# LecturerPower - LecturePop, CompletePop
 # Normality test
+
+# DevYear-LecturePop
 shapiro.test(mydata$LecturePop)
 hist(mydata$LecturePop, breaks=100)
 qqnorm(mydata$LecturePop)
 qqline(mydata$LecturePop)
-LL.aov <- aov(LecturePop ~ as.factor(LecturerPower), data=mydata)
-levene.test(mydata$LecturePop, mydata$LecturerPower, location="mean")
-summary(LL.aov)
-TukeyHSD(LL.aov)
+levene.test(mydata$LecturePop, mydata$DevYear, location="mean")
+DYL.aov <- aov(LecturePop ~ as.factor(DevYear), data=mydata)
+summary(DYL.aov)
+TukeyHSD(DYL.aov)
 par(mfrow=c(2,2))
-plot(LL.aov)
+plot(DYL.aov)
 
+# DevYear-CompletePop
+shapiro.test(mydata$CompletePop)
+hist(mydata$CompletePop, breaks=100)
+qqnorm(mydata$CompletePop)
+qqline(mydata$CompletePop)
+levene.test(mydata$CompletePop, mydata$DevYear, location="mean")
+DYC.aov <- aov(CompletePop ~ as.factor(DevYear), data=mydata)
+summary(DYC.aov)
+TukeyHSD(DYC.aov)
+par(mfrow=c(2,2))
+plot(DYC.aov)
+
+# ContentType-LecturePop
+shapiro.test(mydata$LecturePop)
+hist(mydata$LecturePop, breaks=100)
+qqnorm(mydata$LecturePop)
+qqline(mydata$LecturePop)
+levene.test(mydata$LecturePop, mydata$ContentType, location="mean")
+CTL.aov <- aov(LecturePop ~ as.factor(ContentType), data=mydata)
+summary(CTL.aov)
+TukeyHSD(CTL.aov)
+par(mfrow=c(2,2))
+plot(CTL.aov)
+
+# ContentType-CompletePop
+shapiro.test(mydata$CompletePop)
+hist(mydata$CompletePop, breaks=100)
+qqnorm(mydata$CompletePop)
+qqline(mydata$CompletePop)
+CTC.aov <- aov(CompletePop ~ as.factor(ContentType), data=mydata)
+levene.test(mydata$CompletePop, mydata$ContentType, location="mean")
+summary(CTC.aov)
+TukeyHSD(CTC.aov)
+par(mfrow=c(2,2))
+plot(CTC.aov)
+
+# LecturerPower-CompletePop
 shapiro.test(mydata$CompletePop)
 hist(mydata$CompletePop, breaks=100)
 qqnorm(mydata$CompletePop)
@@ -152,18 +195,27 @@ summary(LC.aov)
 TukeyHSD(LC.aov)
 plot(LC.aov)
 
-# ContentPower - LecturePop, CompletePop
+# ContentPower-LecturePop
 CL.aov <- aov(LecturePop ~ as.factor(ContentPower), data=mydata)
 levene.test(mydata$LecturePop, mydata$ContentPower, location="mean")
 summary(CL.aov)
 TukeyHSD(CL.aov)
 plot(CL.aov)
 
+# ContentPower-CompletePop
 CC.aov <- aov(CompletePop ~ as.factor(ContentPower), data=mydata)
 levene.test(mydata$CompletePop, mydata$ContentPower, location="mean")
 summary(CC.aov)
 TukeyHSD(CC.aov)
 plot(CC.aov)
+
+# by ContentPower vs CompletePop
+aggregate(CompletePop ~ ContentPower, mydata, mean)
+
+library(dplyr)
+mydata %>%
+  filter(ContentPower == 3) %>%
+  select(ContentName)
 
 # SatOperation
 sum(is.na(mydata$SatOperation))
@@ -284,17 +336,33 @@ pairs.panels(mydata2)
 coplot(SatMean ~ Field | LecturePop_interval, data=mydata)
 
 # regression analysis
-mydata.lm <- lm(SatMean ~ LCRate, data=mydata)
+# SatMean - LCRate
+LCRate.lm <- lm(SatMean ~ LCRate, data=mydata)
 #lm(SatMean ~ LCRate, data=mydata, subset=(LCRate > 0.8))
 
-coef(mydata.lm)
-confint(mydata.lm)
-summary(mydata.lm)
+LCRate.lm # coef(LCRate.lm)
+plot(SatMean ~ LCRate, data=mydata)
+abline(LCRate.lm, col="blue")
+plot(LCRate.lm)
+confint(LCRate.lm)
+summary(LCRate.lm)
+LCRate.lm.summary <- summary(LCRate.lm)
+coef(LCRate.lm.summary)
+anova(LCRate.lm)
 
+# regression analysis
+# CompletePop - LecturePop
+CP.lm <- lm(CompletePop ~ LecturePop, data=mydata)
+#lm(SatMean ~ LCRate, data=mydata, subset=(LCRate > 0.8))
+
+CP.lm # coef(CP.lm)
+plot(CompletePop ~ LecturePop, data=mydata)
+abline(CP.lm, col="blue")
+plot(CP.lm)
+confint(CP.lm)
+summary(CP.lm)
 mydata.lm.summary <- summary(mydata.lm)
 coef(mydata.lm.summary)
-
 anova(mydata.lm)
 
 # end
-
