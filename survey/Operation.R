@@ -91,7 +91,17 @@ VIM::aggr(mydata)
 # 특정 변수(컬럼)의 결측값을 제거하고 나머지 컬럼 가져오기 등
 mydata_subset <- mydata[complete.cases(mydata$V8), ] # yearbook
 
+# 기술통계(descriptive statistics)
+# R Friend 블로그 참조
+# https://rfriend.tistory.com/119?category=605867
+# 도수분포표(frequency distribution table)
+# table(), xtabs()
+
+
+
+
 # save file
 write.csv(mydata, file = "mydata.csv", row.names = FALSE)
 write.csv(mydata_subset, file = "mydata_subset.csv", row.names = FALSE)
+
 
