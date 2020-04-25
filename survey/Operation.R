@@ -1,4 +1,3 @@
-
 # 온평원 2014-2019 운영실적 분석
 
 # set working directory
@@ -17,6 +16,7 @@ search()
 mydata <- read.csv("Operation.csv", header = FALSE,
                    stringsAsFactors = TRUE,
                    na.strings = c("", " ", NA))
+
 ls()
 names(mydata)
 dim(mydata)
@@ -24,19 +24,21 @@ class(mydata)
 head(mydata, n=5)
 str(mydata)
 sapply(mydata, class)
-
-# convert columns data type(여러 컬럼의 데이터 타입을 변환)
-# package 'hablar'
-install.packages('hablar')
-library(hablar)
-
-mydata <- mydata %>% convert(int(V1,V2,V6,V9,V10,V14,V20:V56))
+summary(mydata)
 
 # 데이터 확인하기(dplyr)
 library(dplyr)
 dplyr::glimpse(mydata)
 # Error: 'vec_dim' is not an exported object from 'namespace:vctrs'
 # 'pillar' packages를 업데이트해 줘야 함
+
+# convert columns data type(여러 컬럼 데이터 타입을 한 번에 변환)
+# package 'hablar'
+install.packages('hablar')
+library(hablar)
+
+mydata <- mydata %>% convert(int(V1,V2,V6,V9,V10,V14,V20:V56))
+str(mydata)
 
 # 결측치와 유일값 진단(package 'dlookr')
 install.packages('dlookr')
@@ -79,29 +81,183 @@ naniar::miss_case_summary(mydata)
 naniar::miss_var_summary(mydata)
 
 # 결측값 시각화(package 'naniar')
-naniar::vis_miss(mydata)
+naniar::vis_miss(mydata) # Rplot01
 
 # 결측값 시각화(package 'VIM')
 install.packages('VIM')
 library(VIM)
 
-VIM::aggr(mydata)
+VIM::aggr(mydata) # Rplot02
 
 # 연차보고서에 있는 콘텐츠명만 추출
 # 특정 변수(컬럼)의 결측값을 제거하고 나머지 컬럼 가져오기 등
-mydata_subset <- mydata[complete.cases(mydata$V8), ] # yearbook
+# yearbook criteria
+mydata_sub <- mydata[complete.cases(mydata$V8), ]
+VIM::aggr(mydata_subset) # Rplot03
 
 # 기술통계(descriptive statistics)
 # R Friend 블로그 참조
 # https://rfriend.tistory.com/119?category=605867
+
 # 도수분포표(frequency distribution table)
 # table(), xtabs()
+tab_V8 <- table(mydata$V8)
+xtabs(~V8, data=mydata)
+
+# 상대도수분포표(relative frequency distribution table): prop.table()
+options("digits"=2) # 소수점 자리수 설정
+prop.table(tab_V8)
+
+### 막대 그래프(bar plot) ###
+
+# 개발연도별 콘텐츠 수
+ContentDevYear <- data.frame(table(mydata_sub$V1))
+barplot(table(mydata_sub$V1),
+        main = "개발연도별 콘텐츠 수",
+        xlab = "연도",
+        ylab = "개수",
+        ylim = c(0, 150),
+        col = "steelblue",
+        border = "black") # Rplot04
+
+# 개발구분
+ContentDevType <- data.frame(table(mydata_sub$V2))
+barplot(table(mydata_sub$V2),
+        main = "개발구분",
+        xlab = "유형",
+        ylab = "개수",
+        ylim = c(0, 400),
+        col = "steelblue",
+        border = "black") # Rplot05
+
+# 분야
+ContentField <- data.frame(table(mydata_sub$V3))
+barplot(table(mydata_sub$V3),
+        main = "분야",
+        xlab = "분야",
+        ylab = "개수",
+        ylim = c(0, 300),
+        col = "steelblue",
+        border = "black") # Rplot06
+
+# 운영회차
+ContentSub <- data.frame(table(mydata_sub$V5))
+barplot(table(mydata_sub$V5),
+        main = "운영회차",
+        xlab = "운영회차",
+        ylab = "개수",
+        ylim = c(0, 150),
+        col = "steelblue",
+        border = "black") # Rplot07
+
+# 연차보고서 기준 콘텐츠명
+ContentName <- data.frame(table(mydata_sub$V7))
+summary(ContentName)
+
+# 연차보고서 기준 개발년도
+ContentDevYearReport <- data.frame(table(mydata_sub$V9))
+barplot(table(mydata_sub$V9),
+        main = "연차보고서 기준 개발연도별 콘텐츠 수",
+        xlab = "연도",
+        ylab = "개수",
+        ylim = c(0, 250),
+        col = "steelblue",
+        border = "black") # Rplot08
+
+# 연차보고서 기준 확보구분
+ContentGet <- data.frame(table(mydata_sub$V10))
+barplot(table(mydata_sub$V10),
+        main = "연차보고서 기준 확보구분",
+        xlab = "확보구분",
+        ylab = "개수",
+        ylim = c(0, 600),
+        col = "steelblue",
+        border = "black") # Rplot09
+
+# 연차보고서 기준 사업구분
+ContentDevObj <- data.frame(table(mydata_sub$V11))
+barplot(table(mydata_sub$V11),
+        main = "연차보고서 기준 사업구분",
+        xlab = "사업구분",
+        ylab = "개수",
+        ylim = c(0, 600),
+        col = "steelblue",
+        border = "black") # Rplot10
+
+# 연차보고서 기준 NCS 대분류
+ContentNCSHigh <- data.frame(table(mydata_sub$V12))
+barplot(table(mydata_sub$V12),
+        main = "연차보고서 기준 NCS 대분류",
+        xlab = "NCS 대분류",
+        ylab = "개수",
+        ylim = c(0, 300),
+        col = "steelblue",
+        border = "black") # Rplot11
+
+# 연차보고서 기준 콘텐츠 회차
+ContentSubYB <- data.frame(table(mydata_sub$V13))
+barplot(table(mydata_sub$V13),
+        main = "연차보고서 기준 콘텐츠 회차",
+        xlab = "콘텐츠 회차",
+        ylab = "개수",
+        ylim = c(0, 160),
+        col = "steelblue",
+        border = "black") # Rplot12
+
+# 연차보고서 기준 SME 소속
+ContentSMEInOut <- data.frame(table(mydata_sub$V14))
+barplot(table(mydata_sub$V14),
+        main = "연차보고서 기준 SME 소속(내부/외부)",
+        xlab = "내부/외부",
+        ylab = "개수",
+        ylim = c(0, 500),
+        col = "steelblue",
+        border = "black") # Rplot13
+
+# 연차보고서 기준 SME 성명
+ContentSMEName <- data.frame(table(mydata_sub$V15))
+barplot(table(mydata_sub$V15),
+        main = "연차보고서 기준 SME 성명",
+        xlab = "SME 성명",
+        ylab = "개수",
+        ylim = c(0, 25),
+        col = "steelblue",
+        border = "black") # Rplot14
+
+# 연차보고서 기준 강의유형
+ContentLectureType <- data.frame(table(mydata_sub$V16))
+barplot(table(mydata_sub$V16),
+        main = "연차보고서 기준 강의유형",
+        xlab = "강의유형",
+        ylab = "개수",
+        ylim = c(0, 350),
+        col = "steelblue",
+        border = "black") # Rplot15
+
+# 연차보고서 기준 개발유형
+ContentDevMethod <- data.frame(table(mydata_sub$V17))
+barplot(table(mydata_sub$V17),
+        main = "연차보고서 기준 개발유형",
+        xlab = "개발유형",
+        ylab = "개수",
+        ylim = c(0, 600),
+        col = "steelblue",
+        border = "black") # Rplot16
+
+# 연차보고서 기준 상세유형
+ContentLectureDiff <- data.frame(table(mydata_sub$V18))
+barplot(table(mydata_sub$V18),
+        main = "연차보고서 기준 상세유형",
+        xlab = "상세유형",
+        ylab = "개수",
+        ylim = c(0, 200),
+        col = "steelblue",
+        border = "black") # Rplot17
 
 
-
+# data.frame merge
+DataMerge <- rbind(dataframe1, dataframe2)
 
 # save file
-write.csv(mydata, file = "mydata.csv", row.names = FALSE)
-write.csv(mydata_subset, file = "mydata_subset.csv", row.names = FALSE)
-
+# write.csv(mydata_01, file = "mydata.csv", row.names = FALSE)
 
