@@ -37,8 +37,9 @@ dplyr::glimpse(mydata)
 install.packages('hablar')
 library(hablar)
 
-mydata <- mydata %>% convert(int(V1,V2,V6,V9,V10,V14,V20:V56))
-str(mydata)
+# change data type
+#mydata <- mydata %>% convert(int(V1,V2,V6,V9,V10,V14,V20:V56))
+#str(mydata)
 
 # 결측치와 유일값 진단(package 'dlookr')
 install.packages('dlookr')
@@ -95,14 +96,19 @@ VIM::aggr(mydata) # Rplot02
 mydata_sub <- mydata[complete.cases(mydata$V8), ]
 VIM::aggr(mydata_subset) # Rplot03
 
+# save as other file name
+write.csv(mydata_sub, file="mydata_sub.csv", row.names = FALSE)
+
 # 기술통계(descriptive statistics)
 # R Friend 블로그 참조
 # https://rfriend.tistory.com/119?category=605867
 
+### mydata_sub.csv ###
+
 # 도수분포표(frequency distribution table)
 # table(), xtabs()
-tab_V8 <- table(mydata$V8)
-xtabs(~V8, data=mydata)
+tab_V8 <- table(mydata_sub$V8)
+xtabs(~V8, data=mydata_sub)
 
 # 상대도수분포표(relative frequency distribution table): prop.table()
 options("digits"=2) # 소수점 자리수 설정
@@ -254,9 +260,236 @@ barplot(table(mydata_sub$V18),
         col = "steelblue",
         border = "black") # Rplot17
 
+# 20200425
+# https://rfriend.tistory.com/120?category=605867
+
+# 이변량 분할표(contingency table) 
+# 연차보고서 기준 개발연도별/확보구분
+CTDevYearGet <- table(mydata_sub$V9, mydata_sub$V10)
+CTDevYearGet
+
+# 연차보고서 기준 개발연도별/사업구분
+CTDevYearBiz <- table(mydata_sub$V9, mydata_sub$V11)
+CTDevYearBiz
+
+# 연차보고서 기준 NCS 대분류/개발연도별
+CTDevYearNCSHC <- table(mydata_sub$V9, mydata_sub$V12)
+CTDevYearNCSHC
+
+# 연차보고서 기준 개발연도별/회차
+CTDevYearSub <- table(mydata_sub$V9, mydata_sub$V13)
+CTDevYearSub
+
+# 연차보고서 기준 개발연도별/강의유형
+CTDevYearLectureType <- table(mydata_sub$V9, mydata_sub$V16)
+CTDevYearLectureType
+
+# 연차보고서 기준 개발연도별/개발유형
+CTDevYearDevType <- table(mydata_sub$V9, mydata_sub$V17)
+CTDevYearDevType
+
+# 연차보고서 기준 개발연도별/상세유형
+CTDevYearLectureDiff <- table(mydata_sub$V9, mydata_sub$V18)
+CTDevYearLectureDiff
+
+#addmargins(CTDevYearType, margin=1) # row sum이 결과에 추가되어 나옴
+#addmargins(CTDevYearType, margin=2) # col sum이 결과에 추가되어 나옴
+
+# 카이제곱 검정
+# package ("gmodels")
+install.packages("gmodels")
+library(gmodels)
+
+CrossTable(mydata_sub$V9, mydata_sub$V16, expected=TRUE, chisq=TRUE)
+
+# mosaic plot: vcd package, mosaic()
+library(vcd)
+mosaic(CTDevYearLectureType,
+       gp=gpar(fill=c("red", "blue")),
+       direction="v")
+
+# 산(기)술통계량(descriptive statistics)
+# https://rfriend.tistory.com/121?category=605867
+# package: MASS
+library(MASS)
+str(mydata_sub)
+hist(mydata_sub$V53, freq=FALSE, breaks=100)
+mean(mydata_sub$V53, na.rm=TRUE)
+table(mydata_sub$V53)
+
+# 퍼짐정도(분산, 표준편차, 변이계수, 범위, IQR, 백분위수)
+# https://rfriend.tistory.com/122?category=605867
+# package: ggplot2
+
+# 개발연도별 교육인원
+DevYearEdu <- tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
+barplot(DevYearEdu,
+        main="개발연도별 교육인원(수강신청인원)",
+        xlab="연도",
+        ylab="인원(명)",
+        ylim=c(0, 230000),
+        col="steelblue",
+        border="black") # Rplot18
+
+# 변이계수(coefficient of variation)
+# 표준편차의 절대크기가 현저하게 달라서, 평균이 서로 매우 다른 두 집단 간 비교,
+# 측정 단위가 다른 두 변수간 비교에는 부적합하다.
+# 이럴 때 퍼짐 정도를 비교 가능하도록 표준화해준 통계량이 변이계수임
+# 변이계수는 표준편차를 평균으로 나눈 다음에 100을 곱해서 계산함
+
+# 최소값: min()
+# 최대값: max()
+# 범위: diff(range())
+# 백분위수: quantile(x, probs=c())
+# IQR: IQR()
+
+# boxplot totalEdu by YBDevyear
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V9)) # Rplot19
+
+# boxplot totalEdu by YBDevyear, DeyType
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V2)) # Rplot20
+
+# boxplot totalEdu by YBDevYear, ContentGet
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V10)) # Rplot21
+
+# boxplot totalEdu by YBDevYear, ContentBiz
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V11)) # Rplot22
+
+# boxplot totalEdu by YBDevYear, NCSHC
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V12)) # Rplot23
+
+# boxplot totalEdu by YBDevYear, ContentSub
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V13)) # Rplot24
+
+# boxplot totalEdu by YBDevYear, SMEIO
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V14)) # Rplot25
+
+# boxplot totalEdu by YBDevYear, ContentLectureType
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V16)) # Rplot26
+
+# boxplot totalEdu by YBDevYear, ContentDevType
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V17)) # Rplot27
+
+# boxplot totalEdu by YBDevYear, ContentSpecType
+ggplot(mydata_sub, aes(V9, V53)) +
+  geom_boxplot() +
+  facet_wrap(vars(V18)) # Rplot28
+
+### 연속형 변수 요약통계 한번에 보기 ###
+# https://rfriend.tistory.com/124?category=605867
+
+# base
+summary(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")])
+
+# package(pastecs)
+install.packages("pastecs")
+library(pastecs)
+round(stat.desc(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")],
+                basic = TRUE,
+                desc = TRUE,
+                norm = TRUE,
+                p = 0.90), 1)
+
+# basic = TRUE : 관측치 개수, null 개수, NA 개수, 최소값, 최대값, 범위, 합
+# desc = TRUE : 중앙값, 평균, 분산, 표준편차, 변이계수
+# norm = TRUE : 왜도, 첨도, 정규성 검정통계량, 정규성 검정 P-value
+# p = 0.90 :  신뢰계수 90% (유의수준 10%) 값 => 90% 신뢰구간은 평균 ± CI.mean.0.9 값
+# (위의 예 Price의 90% 신뢰구간은 19.51 ± 1.66)
+
+# Check the scipen option
+options("scipen")
+
+# Set scipen
+options(scipen=1)
+
+# psych package: describe()
+# psych package의 describe() 함수는 summary()보다는 많고 stat.desc()보다는
+# 적은 기술통계량을 보여줍니다.
+# describe(): 관측값 개수(n), 평균(mean), 표준편차(sd), 중앙값(median),
+# 절삭평균(10% 절삭평균), 중위값절대편차(from 중위값), 최소값(min), 최대값(max)
+# 범위(range), 왜도(skew), 첨도(kurtosis), 표준오차(SE, standard error)
+install.packages("psych")
+library(psych)
+
+describe(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")],
+         na.rm = TRUE, # not include missing value
+         interp = TRUE, # method of median calculation
+         skew = TRUE, # skewness, kurtosis
+         ranges = TRUE, # range
+         trim = 0.1) # trimmed mean
+
+# 연속형 변수 그룹별(요인별) 요약통계 비교하기
+# tapply(var, factor, summary)  # base
+# by()                          # base
+# aggregate()                   # stats
+# summarBy()                    # doBy (설치 안됨)
+# describe.by()                 # psych
+
+# tapply()
+# 연도별 교육인원
+tapply(mydata_sub$V53, mydata_sub$V9, summary)
+
+# by()
+#fun_summary <- function(x, ...) {
+#  c(n=sum(!is.na(x)), mean=mean(x, ...), sd=sd(x, ...))
+#}
+
+by(mydata_sub[c("V2", "V53", "V19")],
+   mydata_sub$V17,
+   function(x) sapply(x, fun_summary, na.rm=TRUE))
+
+# aggregate()
+# create function(){}
+fun_summary <- function(x, ...) {
+  c(na.rm=TRUE,
+    n=sum(!is.na(x)), # length
+    min=min(x, ...),
+    max=max(x, ...),
+    sum=sum(x, ...),
+    median=median(x, ...),
+    mean=mean(x, ...),
+    var=var(x, ...),
+    sd=sd(x, ...))
+}
+
+# by DevYear, ContentGet etc
+aggregate(V53 ~ V9, data=mydata_sub, fun_summary)
+aggregate(V53 ~ V10, data=mydata_sub, fun_summary)
+aggregate(V53 ~ V11, data=mydata_sub, fun_summary)
+aggregate(V53 ~ V12, data=mydata_sub, fun_summary)
+aggregate(V53 ~ V13, data=mydata_sub, fun_summary)
+aggregate(V53 ~ V16, data=mydata_sub, fun_summary)
+aggregate(V53 ~ V17, data=mydata_sub, fun_summary)
+aggregate(V53 ~ V18, data=mydata_sub, fun_summary)
+
+# summaryBy()
+install.packages("doBy") # 설치 안됨
+
+# describeBy()
+# 요약통계량(n, mean, sd, median, trimmed, mean, mad, min, max, range, skewness, kurtosis, se)
+# 임의로 요약통계량을 지정할 수 없음
+describeBy(mydata_sub[c("V53")], mydata_sub$V9, mat=TRUE)
 
 # data.frame merge
-DataMerge <- rbind(dataframe1, dataframe2)
+#DataMerge <- rbind(dataframe1, dataframe2)
 
 # save file
 # write.csv(mydata_01, file = "mydata.csv", row.names = FALSE)
