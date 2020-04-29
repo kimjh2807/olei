@@ -99,6 +99,17 @@ VIM::aggr(mydata_subset) # Rplot03
 # save as other file name
 write.csv(mydata_sub, file="mydata_sub.csv", row.names = FALSE)
 
+### load refinded data ###
+mydata_sub <- read.csv("mydata_sub.csv", header = FALSE,
+                   stringsAsFactors = TRUE,
+                   na.strings = c("", " ", NA))
+
+# change data type
+# package(hablar)
+library(hablar)
+mydata_sub <- mydata_sub %>% convert(int(V1,V5,V8,V9,V13,V19:V55))
+str(mydata_sub)
+
 # 기술통계(descriptive statistics)
 # R Friend 블로그 참조
 # https://rfriend.tistory.com/119?category=605867
@@ -447,17 +458,7 @@ describe(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")],
 # 연도별 교육인원
 tapply(mydata_sub$V53, mydata_sub$V9, summary)
 
-# by()
-#fun_summary <- function(x, ...) {
-#  c(n=sum(!is.na(x)), mean=mean(x, ...), sd=sd(x, ...))
-#}
-
-by(mydata_sub[c("V2", "V53", "V19")],
-   mydata_sub$V17,
-   function(x) sapply(x, fun_summary, na.rm=TRUE))
-
-# aggregate()
-# create function(){}
+# create function(){} for descriptive statistics(summary)
 fun_summary <- function(x, ...) {
   c(na.rm=TRUE,
     n=sum(!is.na(x)), # length
@@ -470,7 +471,36 @@ fun_summary <- function(x, ...) {
     sd=sd(x, ...))
 }
 
+options(digits=1)
+options(scipen=1)
+
+# by()
+by(mydata_sub[c("V53")],
+   mydata_sub$V9,
+   function(x) sapply(x, fun_summary, na.rm=TRUE))
+
+# aggregate()
 # by DevYear, ContentGet etc
+aggregate(V53 ~ V7, data=mydata_sub, fun_summary)
+ContentNameEdu <- format(aggregate(V53 ~ V7, data=mydata_sub, sum), scientific=FALSE)
+ContentNameEdu
+str(ContentNameEdu)
+# chr -> int
+
+ContentNameEdu <- ContentNameEdu %>% convert(int(V53))
+
+# order
+ContentNameEdu[order(-rank(ContentNameEdu$V53)), ] #ascending
+
+# save file
+write.csv(ContentNameEdu, file="ContentNameEdu.csv", row.names=FALSE)
+
+#콘솔에 출력되는 행의 수가 21부터 줄여서 안 보임 -> options(), max.print 
+options(max.print=1000)
+options(digits=2)
+options(scipen=0)
+
+# 각 변수에 따른 전체 수강신청 인원
 aggregate(V53 ~ V9, data=mydata_sub, fun_summary)
 aggregate(V53 ~ V10, data=mydata_sub, fun_summary)
 aggregate(V53 ~ V11, data=mydata_sub, fun_summary)
@@ -487,6 +517,50 @@ install.packages("doBy") # 설치 안됨
 # 요약통계량(n, mean, sd, median, trimmed, mean, mad, min, max, range, skewness, kurtosis, se)
 # 임의로 요약통계량을 지정할 수 없음
 describeBy(mydata_sub[c("V53")], mydata_sub$V9, mat=TRUE)
+
+# aggregate()
+# 연차보고서 기준, 개발연도, 강의유형, 개발유형, 상세유형, 전체 교육인원(수강신청인원)
+aggregate(V53 ~ V9 + V16 + V17 + V18, mydata_sub, mean)
+
+# 연차보고서 기준, 개발연도, NCS 대분류, 전체 교육인원(수강신청인원)
+aggregate(V53 ~ V9 + V12, mydata_sub, mean)
+aggregate(cbind(V53, V13) ~ V9, mydata_sub, mean)
+aggregate(cbind(V53, V13) ~ V9 + V18, mydata_sub, mean)
+
+# plyr()
+library(plyr)
+aggregate(cbind(V53) ~ V9, mydata_sub, each(sum, mean, max)) # 합계, 평균, 최대값
+
+# filter()
+library(dplyr)
+mydata_sub %>% filter(V9 == 2014, V10 == "개발") %>% select(V7, V53)
+
+# 특정 행을 지정
+mydata_sub %>% filter(V9 == 2014, V10 == "개발") %>% select(V7, V53) %>% slice(c(1:10, 100))
+
+# 정렬
+mydata_sub %>% filter(V9 == 2014, V10 == "개발") %>% select(V7, V53) %>% arrange(desc(V53))
+
+# do()
+# function() {}
+topN <- function(x, N=10) {
+  x %>% filter(V9 == 2014) %>% select(V7, V53) %>% arrange(desc(V53)) %>% head(N)
+}
+
+# upper 20 list
+mydata_sub %>% do(topN(., N = 20))
+
+# 콘텐츠명별 합계를 구하고, topN 함수 적용
+upper <- aggregate(V53 ~ V7, mydata_sub, sum)
+upper
+
+upperN <- function(x, N=10) {
+  x %>% arrange(desc(V53)) %>% head(N)
+}
+
+# upper 10 list
+upper %>% do(upperN(., N = 10))
+
 
 # data.frame merge
 #DataMerge <- rbind(dataframe1, dataframe2)
