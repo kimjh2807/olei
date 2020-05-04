@@ -571,7 +571,7 @@ mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2017
 mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2018
 mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2019
 
-# DevYear insert
+# add DevYear column
 Dev2014$DevYear <- 2014
 Dev2015$DevYear <- 2015
 Dev2016$DevYear <- 2016
