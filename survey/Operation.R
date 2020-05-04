@@ -460,6 +460,7 @@ describe(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")],
 # tapply()
 # 연도별 교육인원
 tapply(mydata_sub$V53, mydata_sub$V9, summary)
+tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
 
 # create function(){} for descriptive statistics(summary)
 fun_summary <- function(x, ...) {
@@ -526,6 +527,7 @@ describeBy(mydata_sub[c("V53")], mydata_sub$V9, mat=TRUE)
 aggregate(V53 ~ V9 + V16 + V17 + V18, mydata_sub, mean)
 
 # 연차보고서 기준, 개발연도, NCS 대분류, 전체 교육인원(수강신청인원)
+aggregate(cbind(V53) ~ V7, mydata_sub, sum, na.rm=TRUE)
 aggregate(V53 ~ V9 + V12, mydata_sub, mean)
 aggregate(cbind(V53, V13) ~ V9, mydata_sub, mean)
 aggregate(cbind(V53, V13) ~ V9 + V18, mydata_sub, mean)
@@ -583,6 +585,78 @@ DevYearEdu <- rbind(Dev2014, Dev2015, Dev2016, Dev2017, Dev2018)
 
 # save file
 write.csv(DevYearEdu, file = "DevYearEdu.csv", row.names = FALSE)
+
+# 콘텐츠명 기준, 연도별 교육인원, 전체 합계
+# 엑셀 피벗 기능임 (pivotpal)
+# attach libraries
+library(tidyverse)
+library(readxl)
+
+# install.packages('here')
+install.packages("here")
+library(here)
+
+# install.packages('skimr')
+install.packages("skimr")
+library(skimr)
+
+# install.packages('kableExtra')
+install.packages("kableExtra")
+library(kableExtra)
+
+# summary()는 수치데이터만 제공, skim()은 non-numeric 데이터에 대한 정보 제공
+skimr::skim(mydata_sub)
+
+# select(), 필요한 변수만 선택
+mydata_sub_pivot <- mydata_sub %>% select(V7, V8, V19, V25, V31, V37, V40, V53)
+skimr::skim(mydata_sub_pivot)
+write.csv(mydata_sub_pivot, file = "mydata_sub_pivot.csv", row.names = FALSE)
+
+# group_by %>% summarize()
+mydata_sub_pivot %>% group_by(V7)
+
+### 피벗테이블 ###
+# 콘텐츠명 기준, 연도별 교육인원(수강신청인원) 합계 만들기
+# 콘텐츠명 기준, 연도별 교육인원 합계
+# 콘텐츠명 기준, 연도별 교육인원 합계, 피벗테이블
+# melt -> aggregate
+aggreEdu2014 <- aggregate(cbind(V19) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEdu2014$year <- 2014
+
+aggreEdu2015 <- aggregate(cbind(V25) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEdu2015$year <- 2015
+
+aggreEdu2016 <- aggregate(cbind(V31) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEdu2016$year <- 2016
+
+aggreEdu2017 <- aggregate(cbind(V37) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEdu2017$year <- 2017
+
+aggreEdu2018 <- aggregate(cbind(V40) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEdu2018$year <- 2018
+
+# renaming columns with dplyr
+aggreEdu2014$V19
+aggreEdu2015 <- aggreEdu2015 %>% rename(V19=V25)
+aggreEdu2016 <- aggreEdu2016 %>% rename(V19=V31)
+aggreEdu2017 <- aggreEdu2017 %>% rename(V19=V37)
+aggreEdu2018 <- aggreEdu2018 %>% rename(V19=V40)
+aggreEdu <- rbind(aggreEdu2014, aggreEdu2015, aggreEdu2016, aggreEdu2017, aggreEdu2018)
+aggreEdu
+
+# melt
+library(MASS)
+library(reshape2)
+library(reshape)
+print(head(aggreEdu, n=10))
+
+aggreEdu.melt <- melt(aggreEdu, id=c("V7", "year"))
+aggreEdu.year <- cast(aggreEdu.melt, V7~year, sum)
+
+# save csv file
+write.csv(aggreEdu.year, file = "aggreEdu.year.csv", row.names = FALSE)
+
+
 
 # data.frame merge
 #DataMerge <- rbind(dataframe1, dataframe2)
