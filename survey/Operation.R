@@ -103,11 +103,14 @@ write.csv(mydata_sub, file="mydata_sub.csv", row.names = FALSE)
 mydata_sub <- read.csv("mydata_sub.csv", header = FALSE,
                    stringsAsFactors = TRUE,
                    na.strings = c("", " ", NA))
+str(mydata_sub)
 
 # change data type
+# package(dplyr)
 # package(hablar)
+library(dplyr)
 library(hablar)
-mydata_sub <- mydata_sub %>% convert(int(V1,V5,V8,V9,V13,V19:V55))
+mydata_sub <- mydata_sub %>% convert(int(V1,V5,V8,V9,V13,V19:V54))
 str(mydata_sub)
 
 # 기술통계(descriptive statistics)
@@ -332,7 +335,7 @@ table(mydata_sub$V53)
 # https://rfriend.tistory.com/122?category=605867
 # package: ggplot2
 
-# 개발연도별 교육인원
+# 개발연도별 교육인원(수강신청인원)
 DevYearEdu <- tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
 barplot(DevYearEdu,
         main="개발연도별 교육인원(수강신청인원)",
@@ -541,26 +544,45 @@ mydata_sub %>% filter(V9 == 2014, V10 == "개발") %>% select(V7, V53) %>% slice
 # 정렬
 mydata_sub %>% filter(V9 == 2014, V10 == "개발") %>% select(V7, V53) %>% arrange(desc(V53))
 
+### 함수 ###
 # do()
 # function() {}
-topN <- function(x, N=10) {
-  x %>% filter(V9 == 2014) %>% select(V7, V53) %>% arrange(desc(V53)) %>% head(N)
+# 개발년도: 입력 받음
+# 개발주체: 입력 받음
+# 콘텐츠명, 교육인원(수강신청인원)
+# 개수는 10개로 지정
+
+# 콘텐츠명(연차보고서) 기준, 개발연도(V7), 교육인원(수강신청인원) 합계
+aggreFUN <- function(x, N) {
+  x %>% aggregate(cbind(V53) ~ V7, ., each(sum)) %>% arrange(desc(V53)) %>% head(N)
 }
 
-# upper 20 list
-mydata_sub %>% do(topN(., N = 20))
-
-# 콘텐츠명별 합계를 구하고, topN 함수 적용
-upper <- aggregate(V53 ~ V7, mydata_sub, sum)
-upper
-
-upperN <- function(x, N=10) {
-  x %>% arrange(desc(V53)) %>% head(N)
+# 개발연도, 개발구분 입력하는 함수
+topN <- function(x, N) {
+  x %>% filter(V9 == readline('DevYear: ')) %>% filter(V10 == readline('DevSubject: ')) %>%
+    select(V7, V53) %>% arrange(desc(V53)) %>% head(N)
 }
 
-# upper 10 list
-upper %>% do(upperN(., N = 10))
+# 개발연도 입력하고, 합계 구함
+mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2014
+mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2015
+mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2016
+mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2017
+mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2018
+mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2019
 
+# DevYear insert
+Dev2014$DevYear <- 2014
+Dev2015$DevYear <- 2015
+Dev2016$DevYear <- 2016
+Dev2017$DevYear <- 2017
+Dev2018$DevYear <- 2018
+
+# rbind
+DevYearEdu <- rbind(Dev2014, Dev2015, Dev2016, Dev2017, Dev2018)
+
+# save file
+write.csv(DevYearEdu, file = "DevYearEdu.csv", row.names = FALSE)
 
 # data.frame merge
 #DataMerge <- rbind(dataframe1, dataframe2)
