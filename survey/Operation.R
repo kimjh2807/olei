@@ -112,6 +112,7 @@ library(dplyr)
 library(hablar)
 mydata_sub <- mydata_sub %>% convert(int(V1,V5,V8,V9,V13,V19:V54))
 str(mydata_sub)
+#write.csv(mydata_sub, file="mydata_sub.csv", row.names = FALSE)
 
 # 기술통계(descriptive statistics)
 # R Friend 블로그 참조
@@ -458,19 +459,20 @@ describe(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")],
 # describe.by()                 # psych
 
 # tapply()
-# 연도별 교육인원
+# 개발연도별 교육인원
 tapply(mydata_sub$V53, mydata_sub$V9, summary)
 tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
 
+# 기술통계(요약)
 # create function(){} for descriptive statistics(summary)
 fun_summary <- function(x, ...) {
   c(na.rm=TRUE,
     n=sum(!is.na(x)), # length
     min=min(x, ...),
-    max=max(x, ...),
-    sum=sum(x, ...),
     median=median(x, ...),
     mean=mean(x, ...),
+    max=max(x, ...),
+    sum=sum(x, ...),
     var=var(x, ...),
     sd=sd(x, ...))
 }
@@ -478,26 +480,35 @@ fun_summary <- function(x, ...) {
 options(digits=1)
 options(scipen=1)
 
+# 개발연도별, 총 교육인원, 요약통계
 # by()
 by(mydata_sub[c("V53")],
    mydata_sub$V9,
    function(x) sapply(x, fun_summary, na.rm=TRUE))
 
+# 연차보고서기준 콘텐츠명별 총 교육인원(수강신청인원)
 # aggregate()
 # by DevYear, ContentGet etc
 aggregate(V53 ~ V7, data=mydata_sub, fun_summary)
 ContentNameEdu <- format(aggregate(V53 ~ V7, data=mydata_sub, sum), scientific=FALSE)
 ContentNameEdu
 str(ContentNameEdu)
-# chr -> int
 
+# chr -> int
+library(dplyr)
+library(hablar)
 ContentNameEdu <- ContentNameEdu %>% convert(int(V53))
 
 # order
-ContentNameEdu[order(-rank(ContentNameEdu$V53)), ] #ascending
+ContentNameEdu[order(-rank(ContentNameEdu$V53)), ] #descending
 
 # save file
 write.csv(ContentNameEdu, file="ContentNameEdu.csv", row.names=FALSE)
+
+# 총 교육인원 분포도 (plot, hist)
+plot(ContentNameEdu$V53)
+hist(ContentNameEdu$V53, breaks="Sturges", col="magenta")
+hist(ContentNameEdu$V53, breaks="FD", col="magenta")
 
 #콘솔에 출력되는 행의 수가 21부터 줄여서 안 보임 -> options(), max.print 
 options(max.print=1000)
@@ -505,14 +516,26 @@ options(digits=2)
 options(scipen=0)
 
 # 각 변수에 따른 전체 수강신청 인원
-aggregate(V53 ~ V9, data=mydata_sub, fun_summary)
-aggregate(V53 ~ V10, data=mydata_sub, fun_summary)
-aggregate(V53 ~ V11, data=mydata_sub, fun_summary)
-aggregate(V53 ~ V12, data=mydata_sub, fun_summary)
-aggregate(V53 ~ V13, data=mydata_sub, fun_summary)
-aggregate(V53 ~ V16, data=mydata_sub, fun_summary)
-aggregate(V53 ~ V17, data=mydata_sub, fun_summary)
-aggregate(V53 ~ V18, data=mydata_sub, fun_summary)
+fun_sum_mean <- function(x, ...) {
+  c(sum=sum(x, ...),
+    mean=mean(x, ...))
+}
+
+# 집계
+aggregate(cbind(V53) ~ V9, mydata_sub, FUN=fun_sum_mean) # 연도별
+aggregate(cbind(V53) ~ V10, mydata_sub, FUN=fun_sum_mean) # 개발(확보)유형별
+aggregate(cbind(V53) ~ V11, mydata_sub, FUN=fun_sum_mean) # 개발유형별
+aggregate(cbind(V53) ~ V12, mydata_sub, FUN=fun_sum_mean) # NCS분류별
+aggregate(cbind(V53) ~ V13, mydata_sub, FUN=fun_sum_mean) # 회차별
+aggregate(cbind(V53) ~ V16, mydata_sub, FUN=fun_sum_mean) # 내용유형별
+aggregate(cbind(V53) ~ V17, mydata_sub, FUN=fun_sum_mean) # 강의개발유형별
+aggregate(cbind(V53) ~ V18, mydata_sub, FUN=fun_sum_mean) # 강사강의유형별
+
+# 변수 조합 집계
+arrange(aggregate(cbind(V53) ~ V9 + V16, mydata_sub, FUN=fun_sum_mean), V9, V16)
+arrange(aggregate(cbind(V53) ~ V9 + V18, mydata_sub, FUN=fun_sum_mean), V9, V18)
+arrange(aggregate(cbind(V53) ~ V16 + V18, mydata_sub, FUN=fun_sum_mean), V16, V18)
+arrange(aggregate(cbind(V53) ~ V9 + V16 + V18, mydata_sub, FUN=fun_sum_mean), V9, V16, V18)
 
 # summaryBy()
 install.packages("doBy") # 설치 안됨
@@ -635,13 +658,18 @@ aggreEdu2017$year <- 2017
 aggreEdu2018 <- aggregate(cbind(V40) ~ V7, mydata_sub, sum, na.rm=TRUE)
 aggreEdu2018$year <- 2018
 
+aggreEdu2019 <- aggregate(cbind(V46) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEdu2019$year <- 2019
+
 # renaming columns with dplyr
+library(dplyr)
 aggreEdu2014$V19
 aggreEdu2015 <- aggreEdu2015 %>% rename(V19=V25)
 aggreEdu2016 <- aggreEdu2016 %>% rename(V19=V31)
 aggreEdu2017 <- aggreEdu2017 %>% rename(V19=V37)
 aggreEdu2018 <- aggreEdu2018 %>% rename(V19=V40)
-aggreEdu <- rbind(aggreEdu2014, aggreEdu2015, aggreEdu2016, aggreEdu2017, aggreEdu2018)
+aggreEdu2019 <- aggreEdu2019 %>% rename(V19=V46)
+aggreEdu <- rbind(aggreEdu2014, aggreEdu2015, aggreEdu2016, aggreEdu2017, aggreEdu2018, aggreEdu2019)
 aggreEdu
 
 # melt
@@ -651,11 +679,213 @@ library(reshape)
 print(head(aggreEdu, n=10))
 
 aggreEdu.melt <- melt(aggreEdu, id=c("V7", "year"))
-aggreEdu.year <- cast(aggreEdu.melt, V7~year, sum)
+aggreEduYear <- cast(aggreEdu.melt, V7~year, sum)
 
 # save csv file
-write.csv(aggreEdu.year, file = "aggreEdu.year.csv", row.names = FALSE)
+write.csv(aggreEduYear, file = "aggreEduYear.csv", row.names = FALSE)
 
+# 콘텐츠명 기준, 연도별 수료인원 합계 
+# 콘텐츠명 기준, 연도별 수료인원 합계, 피벗테이블
+# melt -> aggregate
+aggreCom2014 <- aggregate(cbind(V20) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreCom2014$year <- 2014
+
+aggreCom2015 <- aggregate(cbind(V26) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreCom2015$year <- 2015
+
+aggreCom2016 <- aggregate(cbind(V32) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreCom2016$year <- 2016
+
+aggreCom2017 <- aggregate(cbind(V38) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreCom2017$year <- 2017
+
+aggreCom2018 <- aggregate(cbind(V41) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreCom2018$year <- 2018
+
+aggreCom2019 <- aggregate(cbind(V47) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreCom2019$year <- 2019
+
+# renaming columns with dplyr
+library(dplyr)
+aggreCom2014$V20
+aggreCom2015 <- aggreCom2015 %>% rename(V20=V26)
+aggreCom2016 <- aggreCom2016 %>% rename(V20=V32)
+aggreCom2017 <- aggreCom2017 %>% rename(V20=V38)
+aggreCom2018 <- aggreCom2018 %>% rename(V20=V41)
+aggreCom2019 <- aggreCom2019 %>% rename(V20=V47)
+aggreCom <- rbind(aggreCom2014, aggreCom2015, aggreCom2016, aggreCom2017, aggreCom2018, aggreCom2019)
+aggreCom
+
+# melt
+library(MASS)
+library(reshape2)
+library(reshape)
+print(head(aggreCom, n=10))
+
+aggreCom.melt <- melt(aggreCom, id=c("V7", "year"))
+aggreComYear <- cast(aggreCom.melt, V7~year, sum)
+
+# save csv file
+write.csv(aggreComYear, file = "aggreComYear.csv", row.names = FALSE)
+
+# 교육인원(수강신청인원) 대비 수료인원
+# 엑셀에서 두 개 파일(aggreEdu.year, aggreCom.year)을 vlookup으로 작업해서 가져오기
+# 다음 이름으로 저장, aggreEduComYear.csv
+#rm(list=ls(pattern="aggre"))
+
+# 콘텐츠별 재직자, 구직자, 기타별로 교육인원(수강신청인원)
+# 재직자
+
+# 2014은 재직자, 구직자, 기타가 구분되어 있지 않음
+
+aggreEmp2015 <- aggregate(cbind(V22) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEmp2015$year <- 2015
+
+aggreEmp2016 <- aggregate(cbind(V28) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEmp2016$year <- 2016
+
+aggreEmp2017 <- aggregate(cbind(V34) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEmp2017$year <- 2017
+
+# 2018은 재직자, 구직자, 기타가 구분되어 있지 않음
+
+aggreEmp2019 <- aggregate(cbind(V43) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEmp2019$year <- 2019
+
+# renaming columns with dplyr
+library(dplyr)
+aggreEmp2015$V22
+aggreEmp2016 <- aggreEmp2016 %>% rename(V22=V28)
+aggreEmp2017 <- aggreEmp2017 %>% rename(V22=V34)
+#aggreEmp2018 <- aggreEmp2018 %>% rename(V22=V41)
+aggreEmp2019 <- aggreEmp2019 %>% rename(V22=V43)
+
+aggreEmp <- rbind(aggreEmp2015, aggreEmp2016, aggreEmp2017, aggreEmp2019)
+aggreEmp
+
+# melt
+library(MASS)
+library(reshape2)
+library(reshape)
+
+aggreEmp.melt <- melt(aggreEmp, id=c("V7", "year"))
+aggreEmpYear <- cast(aggreEmp.melt, V7~year, sum)
+
+# save csv file
+write.csv(aggreEmpYear, file = "aggreEmpYear.csv", row.names = FALSE)
+
+# 구직자
+# 2014은 재직자, 구직자, 기타가 구분되어 있지 않음
+# 2018은 재직자, 구직자, 기타가 구분되어 있지 않음
+
+aggreSeek2015 <- aggregate(cbind(V23) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreSeek2015$year <- 2015
+
+aggreSeek2016 <- aggregate(cbind(V29) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreSeek2016$year <- 2016
+
+aggreSeek2017 <- aggregate(cbind(V35) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreSeek2017$year <- 2017
+
+aggreSeek2019 <- aggregate(cbind(V44) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreSeek2019$year <- 2019
+
+# renaming columns with dplyr
+library(dplyr)
+aggreSeek2015$V23
+aggreSeek2016 <- aggreSeek2016 %>% rename(V23=V29)
+aggreSeek2017 <- aggreSeek2017 %>% rename(V23=V35)
+aggreSeek2019 <- aggreSeek2019 %>% rename(V23=V44)
+
+aggreSeek <- rbind(aggreSeek2015, aggreSeek2016, aggreSeek2017, aggreSeek2019)
+aggreSeek
+
+# melt
+library(MASS)
+library(reshape2)
+library(reshape)
+
+aggreSeek.melt <- melt(aggreSeek, id=c("V7", "year"))
+aggreSeekYear <- cast(aggreSeek.melt, V7~year, sum)
+
+# save csv file
+write.csv(aggreSeekYear, file = "aggreSeekYear.csv", row.names = FALSE)
+
+# 기타
+# 2014은 재직자, 구직자, 기타가 구분되어 있지 않음
+# 2018은 재직자, 구직자, 기타가 구분되어 있지 않음
+
+aggreEtc2015 <- aggregate(cbind(V24) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEtc2015$year <- 2015
+
+aggreEtc2016 <- aggregate(cbind(V30) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEtc2016$year <- 2016
+
+aggreEtc2017 <- aggregate(cbind(V36) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEtc2017$year <- 2017
+
+aggreEtc2019 <- aggregate(cbind(V45) ~ V7, mydata_sub, sum, na.rm=TRUE)
+aggreEtc2019$year <- 2019
+
+# renaming columns with dplyr
+library(dplyr)
+aggreEtc2015$V24
+aggreEtc2016 <- aggreEtc2016 %>% rename(V24=V30)
+aggreEtc2017 <- aggreEtc2017 %>% rename(V24=V36)
+aggreEtc2019 <- aggreEtc2019 %>% rename(V24=V45)
+
+aggreEtc <- rbind(aggreEtc2015, aggreEtc2016, aggreEtc2017, aggreEtc2019)
+aggreEtc
+
+# melt
+library(MASS)
+library(reshape2)
+library(reshape)
+
+aggreEtc.melt <- melt(aggreEtc, id=c("V7", "year"))
+aggreEtcYear <- cast(aggreEtc.melt, V7~year, sum)
+
+# save csv file
+write.csv(aggreEtcYear, file = "aggreEtcYear.csv", row.names = FALSE)
+
+################ 만족도 ####################
+
+# 만족도
+mydata_sat <- mydata[complete.cases(mydata$V8), ]
+write.csv(mydata_sat, file="mydata_sat.csv", row.names = FALSE)
+
+
+# load refinded data #
+mydata_sat <- read.csv("mydata_sat.csv", header = FALSE,
+                       stringsAsFactors = TRUE,
+                       na.strings = c("", " ", NA))
+
+mydata_sat <- mydata_sat[c("V7", "V49", "V50", "V51", "V52")]
+
+# change data type to numeric
+# package(dplyr)
+# package(hablar)
+library(dplyr)
+library(hablar)
+mydata_sat <- mydata_sat %>% convert(num(V49,V50,V51,V52))
+
+# average (소수점 1자리)
+mydata_sat$V53 <- round(rowMeans(mydata_sat[, c(2:5)], na.rm=TRUE), 1)
+
+# 콘텐츠별로 집계
+aggreSat <- aggregate(cbind(V52) ~ V7, mydata_sat, mean, na.rm=TRUE, 1)
+aggreSat$V52 <- round(aggreSat$V52, 1)
+
+# save file
+write.csv(aggreSat, file="aggreSat.csv", row.names=FALSE)
+
+# 만족도가 높은 콘텐츠
+# desceding, dplyr, arrange
+table(aggreSat$V52)
+plot(aggreSat$V52)
+hist(aggreSat$V52)
+aggreSat %>% arrange(desc(V52)) %>% head(20)
+aggreSat %>% filter(V52 > 4.6)
 
 
 # data.frame merge
