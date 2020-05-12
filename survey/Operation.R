@@ -463,6 +463,34 @@ describe(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")],
 tapply(mydata_sub$V53, mydata_sub$V9, summary)
 tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
 
+# graph
+graph <- tapply(mydata_sub$V53, mydata_sub$V9, mean, na.rm=TRUE)
+typeof(graph)
+graph
+graph <- data.frame(graph)
+colnames(graph) <- "mean"
+rownames(graph)
+str(graph)
+graph <- round(graph, 0)
+graph$year <- c(2005, 2007:2019)
+
+# list -> data.frame
+#graph <- data.frame(matrix(unlist(graph), ncol=6, nrow=14, byrow=TRUE))
+#graph <- round(graph, 0)
+
+#colnames(graph) <- c("Min", "1st Qu", "Median", "Mean", "3rd Qu", "Max", "NA")
+#rownames(graph) <- c(1:14)
+
+# graph
+library(dplyr)
+library(ggplot2)
+
+graph %>% mutate(year=factor(year)) %>%
+  ggplot(aes(x=year, y=mean)) +
+  geom_bar(stat="identity", fill="steelblue", col="dodgerblue") +
+  labs(x="DevYear", y="Mean of Edu Pop") +
+  geom_text(aes(label=scales::comma(mean)), color="maroon", vjust=-0.5, size=4) # Rplot30
+
 # 기술통계(요약)
 # create function(){} for descriptive statistics(summary)
 fun_summary <- function(x, ...) {
@@ -485,6 +513,24 @@ options(scipen=1)
 by(mydata_sub[c("V53")],
    mydata_sub$V9,
    function(x) sapply(x, fun_summary, na.rm=TRUE))
+
+# list -> data frame
+graph <- by(mydata_sub[c("V53")],
+   mydata_sub$V9,
+   function(x) sapply(x, fun_summary, na.rm=TRUE))
+
+year <- c(2005, 2007:2019)
+sum <- c(3443, 11286, 2624, 15315, 4591, 8035, 6173, 15652, 223104, 69086, 26261, 39456, 13754, 601)
+graph <- data.frame(year, sum)
+graph
+typeof(graph)
+
+# graph
+graph %>% mutate(year=factor(year)) %>%
+  ggplot(aes(x=year, y=sum)) +
+  geom_bar(stat="identity", fill="steelblue", col="dodgerblue") +
+  labs(x="DevYear", y="Sum of Edu Pop") +
+  geom_text(aes(label=scales::comma(sum)), color="maroon", vjust=-0.5, size=4) # Rplot31
 
 # 연차보고서기준 콘텐츠명별 총 교육인원(수강신청인원)
 # aggregate()
@@ -509,6 +555,21 @@ write.csv(ContentNameEdu, file="ContentNameEdu.csv", row.names=FALSE)
 plot(ContentNameEdu$V53)
 hist(ContentNameEdu$V53, breaks="Sturges", col="magenta")
 hist(ContentNameEdu$V53, breaks="FD", col="magenta")
+
+# load data
+ContentNameEdu <- read.csv("ContentNameEdu.csv", header = TRUE,
+                           stringsAsFactors = TRUE,
+                           na.strings = c("", " ", NA))
+
+# graph
+ContentNameEdu %>% arrange(desc(V53)) %>% head(25) %>%
+ggplot(aes(x=reorder(V7, V53), y=V53)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") +
+  geom_bar(stat="identity", data=subset(ContentNameEdu, ContentNameEdu$V53>= 10000), fill="tomato", col="maroon") +
+  geom_text(aes(label=scales::comma(V53)), color="maroon", hjust=-0.2, vjust=0.5, size=3) +
+  labs(x="Content Name", y="Sum of Edu Pop") +
+  theme(axis.text.x=element_text(angle=90)) +
+  coord_flip()
 
 #콘솔에 출력되는 행의 수가 21부터 줄여서 안 보임 -> options(), max.print 
 options(max.print=1000)
@@ -893,4 +954,3 @@ aggreSat %>% filter(V52 > 4.6)
 
 # save file
 # write.csv(mydata_01, file = "mydata.csv", row.names = FALSE)
-
