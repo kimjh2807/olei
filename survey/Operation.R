@@ -639,36 +639,63 @@ mydata_sub %>% filter(V9 == 2014, V10 == "개발") %>% select(V7, V53) %>% arran
 # 개수는 10개로 지정
 
 # 콘텐츠명(연차보고서) 기준, 개발연도(V7), 교육인원(수강신청인원) 합계
+#aggreFUN <- function(x, N) {
+#  x %>% aggregate(cbind(V53) ~ V7, ., each(sum)) %>% arrange(desc(V53)) %>% head(N)
+#}
+
 aggreFUN <- function(x, N) {
-  x %>% aggregate(cbind(V53) ~ V7, ., each(sum)) %>% arrange(desc(V53)) %>% head(N)
+  x %>% aggregate(cbind(V53) ~ V7 + V9, ., each(sum))
 }
 
 # 개발연도, 개발구분 입력하는 함수
+#topN <- function(x, N) {
+#  x %>% filter(V9 == readline('DevYear: ')) %>% select(V7, V53)
+#}
+
 topN <- function(x, N) {
-  x %>% filter(V9 == readline('DevYear: ')) %>% filter(V10 == readline('DevSubject: ')) %>%
-    select(V7, V53) %>% arrange(desc(V53)) %>% head(N)
+  x %>% select(V7, V9, V53)
 }
 
+DevYearEdu <- mydata_sub %>% do(topN(.)) %>% do(aggreFUN(.))
+
 # 개발연도 입력하고, 합계 구함
-mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2014
-mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2015
-mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2016
-mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2017
-mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2018
-mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2019
+#mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2014
+#mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2015
+#mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2016
+#mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2017
+#mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2018
+#mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2019
 
 # add DevYear column
-Dev2014$DevYear <- 2014
-Dev2015$DevYear <- 2015
-Dev2016$DevYear <- 2016
-Dev2017$DevYear <- 2017
-Dev2018$DevYear <- 2018
+#Dev2014$DevYear <- 2014
+#Dev2015$DevYear <- 2015
+#Dev2016$DevYear <- 2016
+#Dev2017$DevYear <- 2017
+#Dev2018$DevYear <- 2018
+#Dev2019$DevYear <- 2019
 
+# 앞에서 정리한 내용을 하나의 파일로 합침
 # rbind
-DevYearEdu <- rbind(Dev2014, Dev2015, Dev2016, Dev2017, Dev2018)
+#DevYearEdu <- rbind(Dev2014, Dev2015, Dev2016, Dev2017, Dev2018)
 
 # save file
 write.csv(DevYearEdu, file = "DevYearEdu.csv", row.names = FALSE)
+
+# load data
+DevYearEdu <- read.csv("DevYearEdu.csv", header=TRUE, stringsAsFactors=TRUE)
+str(DevYearEdu)
+
+colnames(DevYearEdu) <- c("V7", "V9", "V53")
+
+# graph
+DevYearEdu %>% arrange(desc(V53)) %>% head(25) %>%
+  ggplot(aes(x=reorder(V7, V53), y=V53)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") +
+  geom_bar(stat="identity", data=subset(DevYearEdu, DevYearEdu$V53>= 10000), fill="tomato", col="maroon") +
+  geom_text(aes(label=scales::comma(V53)), color="maroon", hjust=-0.2, vjust=0.5, size=3) +
+  labs(x="Content Name", y="Sum of Edu Pop") +
+  theme(axis.text.x=element_text(angle=90)) +
+  coord_flip()
 
 # 콘텐츠명 기준, 연도별 교육인원, 전체 합계
 # 엑셀 피벗 기능임 (pivotpal)
@@ -954,3 +981,4 @@ aggreSat %>% filter(V52 > 4.6)
 
 # save file
 # write.csv(mydata_01, file = "mydata.csv", row.names = FALSE)
+
