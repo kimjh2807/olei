@@ -658,10 +658,10 @@ pal2 <- brewer.pal(9, "Blues")[5:9]
 wordcloud(words = df_word$Var1, #단어
           freq = df_word$Freq, #빈도
           min.freq = 2, #최소 단어 빈도
-          max.words = 1000, #표현 단어 수
-          random.order = F, #고빈도 단어 중앙 배치
+          max.words = Inf, #표현 단어 수
+          random.order = FALSE, #고빈도 단어 중앙 배치 yes
           rot.per = .1, #회전 단어 비율
-          scale = c(5, 0.1), #단어 크기 범위
+          scale = c(4, 0.5), #단어 크기 범위
           colors = pal) #색깔 목록
 
 
