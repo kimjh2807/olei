@@ -489,7 +489,7 @@ graph %>% mutate(year=factor(year)) %>%
   ggplot(aes(x=year, y=mean)) +
   geom_bar(stat="identity", fill="steelblue", col="dodgerblue") +
   labs(x="DevYear", y="Mean of Edu Pop") +
-  geom_text(aes(label=scales::comma(mean)), color="maroon", vjust=-0.5, size=4) # Rplot30
+  geom_text(aes(label=scales::comma(mean)), color="maroon", vjust=-0.5, size=4) # Rplot29
 
 # 기술통계(요약)
 # create function(){} for descriptive statistics(summary)
@@ -530,7 +530,7 @@ graph %>% mutate(year=factor(year)) %>%
   ggplot(aes(x=year, y=sum)) +
   geom_bar(stat="identity", fill="steelblue", col="dodgerblue") +
   labs(x="DevYear", y="Sum of Edu Pop") +
-  geom_text(aes(label=scales::comma(sum)), color="maroon", vjust=-0.5, size=4) # Rplot31
+  geom_text(aes(label=scales::comma(sum)), color="maroon", vjust=-0.5, size=4) # Rplot30
 
 # 연차보고서기준 콘텐츠명별 총 교육인원(수강신청인원)
 # aggregate()
@@ -561,7 +561,11 @@ ContentNameEdu <- read.csv("ContentNameEdu.csv", header = TRUE,
                            stringsAsFactors = TRUE,
                            na.strings = c("", " ", NA))
 
-# graph
+# library
+library(dplyr)
+library(ggplot2)
+
+# graph (bar chart)
 ContentNameEdu %>% arrange(desc(V53)) %>% head(25) %>%
 ggplot(aes(x=reorder(V7, V53), y=V53)) +
   geom_bar(stat="identity", fill="dodgerblue", col="steelblue") +
@@ -569,7 +573,97 @@ ggplot(aes(x=reorder(V7, V53), y=V53)) +
   geom_text(aes(label=scales::comma(V53)), color="maroon", hjust=-0.2, vjust=0.5, size=3) +
   labs(x="Content Name", y="Sum of Edu Pop") +
   theme(axis.text.x=element_text(angle=90)) +
-  coord_flip()
+  coord_flip() # Rplot31
+
+
+######################## 텍스트 분석 ##########################
+
+# 1,000명 이상 수강신청한 과정명 텍스트 분석
+ContentName <- ContentNameEdu %>% filter(V53 >= 1000) %>% select(V7)
+
+# txt 파일로 저장
+write.csv(ContentName, file="ContentName.txt", row.names = FALSE)
+
+# 텍스트 마이닝
+# install package(rJava, memoise, KoNLP)
+install.packages("rJava")
+install.packages("memoise")
+install.packages("KoNLP")
+
+# load package
+library(KoNLP)
+library(dplyr)
+
+useNIADic()
+# 'C:/Users/user/AppData/Local/Temp/RtmpiOFTyv/remotes133ec7609268e/NIADic/inst/doc'
+
+# load text
+txt <- readLines("ContentName.txt")
+head(txt)
+txt
+
+# 특수문자 제거하기
+install.packages("stringr")
+library(stringr)
+
+# str_replace_all(대상, 변경할 패턴, 변경될 패턴) 
+# sub(), gsub()과 같은 기능
+# regex [:punct:] ~!@#$%^&*(){}_+:"<>?,./;'[]-=
+txt <- str_replace_all(txt, "!", "")
+txt <- str_replace_all(txt, ",", "")
+txt <- str_replace_all(txt, "/", "")
+txt <- str_replace_all(txt, ":", "")
+.
+.
+.
+#txt <- str_replace_all(txt, "[[:punct:]]", " ")
+txt
+#write.csv(txt, file="ContentName.txt", row.names = FALSE)
+
+# 파일에서 명사 추출
+nouns <- extractNoun(txt)
+nouns
+# 추출한 명사 list를 문자열 벡터로 변환, 단어별 빈도표 생성
+wordcount <- table(unlist(nouns))
+
+# 데이터 프레임으로 변환
+df_word <- as.data.frame(wordcount, stringAsFactors = FALSE)
+
+# 변수명 수정
+#library(dplyr)
+#df_word <- rename(df_word, word=Var1, freq=Freq)
+
+# data type change
+df_word$Var1 <- as.character(df_word$Var1)
+str(df_word)
+
+# 두 글자 이상 단어 추출
+df_word <- filter(df_word, nchar(Var1) >= 2)
+
+top20 <- df_word %>% arrange(desc(Freq)) %>% head(20)
+top20
+
+# 워드 클라우드 만들기
+# install package (wordcloud)
+install.packages("wordcloud")
+
+# load packages
+library(wordcloud)
+library(RColorBrewer)
+
+# Dark2 색상 목록에서 8개 색상 추출
+pal <- brewer.pal(8, "Dark2")
+pal2 <- brewer.pal(9, "Blues")[5:9]
+
+wordcloud(words = df_word$Var1, #단어
+          freq = df_word$Freq, #빈도
+          min.freq = 2, #최소 단어 빈도
+          max.words = 1000, #표현 단어 수
+          random.order = F, #고빈도 단어 중앙 배치
+          rot.per = .1, #회전 단어 비율
+          scale = c(5, 0.1), #단어 크기 범위
+          colors = pal) #색깔 목록
+
 
 #콘솔에 출력되는 행의 수가 21부터 줄여서 안 보임 -> options(), max.print 
 options(max.print=1000)
@@ -658,6 +752,7 @@ topN <- function(x, N) {
 
 DevYearEdu <- mydata_sub %>% do(topN(.)) %>% do(aggreFUN(.))
 
+# 특정 연도만 뽑을 때
 # 개발연도 입력하고, 합계 구함
 #mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2014
 #mydata_sub %>% do(topN(., N=31)) %>% do(aggreFUN(., N=31)) -> Dev2015
@@ -684,8 +779,6 @@ write.csv(DevYearEdu, file = "DevYearEdu.csv", row.names = FALSE)
 # load data
 DevYearEdu <- read.csv("DevYearEdu.csv", header=TRUE, stringsAsFactors=TRUE)
 str(DevYearEdu)
-
-colnames(DevYearEdu) <- c("V7", "V9", "V53")
 
 # graph
 DevYearEdu %>% arrange(desc(V53)) %>% head(25) %>%
@@ -936,7 +1029,10 @@ aggreEtcYear <- cast(aggreEtc.melt, V7~year, sum)
 # save csv file
 write.csv(aggreEtcYear, file = "aggreEtcYear.csv", row.names = FALSE)
 
-################ 만족도 ####################
+
+
+
+############################# 만족도 #################################
 
 # 만족도
 mydata_sat <- mydata[complete.cases(mydata$V8), ]
