@@ -463,7 +463,7 @@ describe(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")],
 tapply(mydata_sub$V53, mydata_sub$V9, summary)
 tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
 
-# graph
+# graph 그리기 준비
 graph <- tapply(mydata_sub$V53, mydata_sub$V9, mean, na.rm=TRUE)
 typeof(graph)
 graph
@@ -489,7 +489,7 @@ graph %>% mutate(year=factor(year)) %>%
   ggplot(aes(x=year, y=mean)) +
   geom_bar(stat="identity", fill="steelblue", col="dodgerblue") +
   labs(x="DevYear", y="Mean of Edu Pop") +
-  geom_text(aes(label=scales::comma(mean)), color="maroon", vjust=-0.5, size=4) # Rplot29
+  geom_text(aes(label=scales::comma(mean)), color="maroon", vjust=-0.5, size=4) # Rplot30
 
 # 기술통계(요약)
 # create function(){} for descriptive statistics(summary)
@@ -530,7 +530,7 @@ graph %>% mutate(year=factor(year)) %>%
   ggplot(aes(x=year, y=sum)) +
   geom_bar(stat="identity", fill="steelblue", col="dodgerblue") +
   labs(x="DevYear", y="Sum of Edu Pop") +
-  geom_text(aes(label=scales::comma(sum)), color="maroon", vjust=-0.5, size=4) # Rplot30
+  geom_text(aes(label=scales::comma(sum)), color="maroon", vjust=-0.5, size=4) # Rplot31
 
 # 연차보고서기준 콘텐츠명별 총 교육인원(수강신청인원)
 # aggregate()
@@ -551,9 +551,9 @@ ContentNameEdu[order(-rank(ContentNameEdu$V53)), ] #descending
 # save file
 write.csv(ContentNameEdu, file="ContentNameEdu.csv", row.names=FALSE)
 
-# 총 교육인원 분포도 (plot, hist)
+# 총 교육인원 분포도 (plot, hist), breaks 계급 구간의 수
 plot(ContentNameEdu$V53)
-hist(ContentNameEdu$V53, breaks="Sturges", col="magenta")
+hist(ContentNameEdu$V53, breaks="Sturges", col="magenta") # Rplot29
 hist(ContentNameEdu$V53, breaks="FD", col="magenta")
 
 # load data
@@ -573,7 +573,174 @@ ggplot(aes(x=reorder(V7, V53), y=V53)) +
   geom_text(aes(label=scales::comma(V53)), color="maroon", hjust=-0.2, vjust=0.5, size=3) +
   labs(x="Content Name", y="Sum of Edu Pop") +
   theme(axis.text.x=element_text(angle=90)) +
-  coord_flip() # Rplot31
+  coord_flip() # Rplot32
+
+# 개발(확보)유형별 총 교육인원(수강신청인원)
+fun_sum_mean <- function(x, ...) {
+  c(na.rm=TRUE,
+    mean=mean(x, ...),
+    sum=sum(x, ...))
+}
+
+options(digits=1)
+options(scipen=1)
+graph <- aggregate(cbind(V53) ~ V10, mydata_sub, FUN=fun_sum_mean)
+typeof(graph)
+graph <- data.frame(graph)
+graph
+
+graph$V53_mean <- c(490, 28, 754, 825)
+graph$V53_sum <- c(288900, 304, 43704, 106473)
+
+graph
+
+# graph (V53_mean)
+ggplot(graph, aes(V10, V53_mean)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot33
+ 
+# graph (V53_sum)
+ggplot(graph, aes(V10, V53_sum)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot34
+
+# 개발유형별 총 교육인원(수강신청인원)
+graph <- aggregate(cbind(V53) ~ V11, mydata_sub, FUN=fun_sum_mean)
+graph
+graph$V53_mean <- c(544, 604, 241)
+graph$V53_sum <- c(102803, 320173, 16405)
+graph
+
+# graph (V53_mean)
+ggplot(graph, aes(V11, V53_mean)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot35
+
+# graph (V53_sum)
+ggplot(graph, aes(V11, V53_sum)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot36
+
+# NCS 분류별, 총 교육인원(수강신청인원)
+graph <- aggregate(cbind(V53) ~ V12, mydata_sub, FUN=fun_sum_mean)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# 위와 동일
+graph$V53_mean <- c(843,2125,349,386,208,610,197,135,489,514,342,226,2235,226,245)
+graph$V53_sum <- c(36266,29752,1747,15444,3745,103024,1771,1895,64489,121859,6845,
+                   678,35764,3839,12263)
+
+# graph
+ggplot(graph, aes(V12, V53_mean)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") +
+  coord_flip()# Rplot37
+
+ggplot(graph, aes(V12, V53_sum)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") +
+  coord_flip()# Rplot38
+
+# 회차별, 총 교육인원(수강신청인원)
+graph <- aggregate(cbind(V53) ~ V5, mydata_sub, FUN=fun_sum_mean)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# graph
+# 차시를 factor로 대입하면, 있는 차시만 그래프에 나타남
+ggplot(graph, aes(factor(V5), V53_mean)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot39
+
+ggplot(graph, aes(factor(V5), V53_sum)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot40
+
+# 내용유형별, 총 교육인원(수강신청인원)
+graph <- aggregate(cbind(V53) ~ V16, mydata_sub, FUN=fun_sum_mean)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# graph
+ggplot(graph, aes(factor(V16), V53_mean)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot41
+
+ggplot(graph, aes(factor(V16), V53_sum)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot42
+
+# 강의개발유형별, 총 교육인원(수강신청인원)
+graph <- aggregate(cbind(V53) ~ V17, mydata_sub, FUN=fun_sum_mean)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# graph
+ggplot(graph, aes(factor(V17), V53_mean)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot43
+
+ggplot(graph, aes(factor(V17), V53_sum)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot44
+
+# 강사강의유형별, 총 교육인원(수강신청인원)
+graph <- aggregate(cbind(V53) ~ V18, mydata_sub, FUN=fun_sum_mean)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# graph
+ggplot(graph, aes(factor(V18), V53_mean)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot45
+
+ggplot(graph, aes(factor(V18), V53_sum)) +
+  geom_bar(stat="identity", fill="dodgerblue", col="steelblue") # Rplot46
+
+# 연도별, 내용유형별, 총 교육인원(수강인원)
+graph <- arrange(aggregate(cbind(V53) ~ V9 + V16, mydata_sub, FUN=fun_sum_mean), V9)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# graph
+ggplot(graph, aes(x=factor(V9), y=V53_mean, fill=graph$V16)) +
+  geom_bar(stat="identity") # Rplot47
+
+ggplot(graph, aes(x=factor(V9), y=V53_sum, fill=graph$V16)) +
+  geom_bar(stat="identity") # Rplot48
+
+# 연도별, 강사강의유형별, 총 교육인원(수강인원)
+graph <- arrange(aggregate(cbind(V53) ~ V9 + V18, mydata_sub, FUN=fun_sum_mean), V9, V18)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# graph
+ggplot(graph, aes(x=factor(V9), y=V53_mean, fill=graph$V18)) +
+  geom_bar(stat="identity") # Rplot49
+
+ggplot(graph, aes(x=factor(V9), y=V53_sum, fill=graph$V18)) +
+  geom_bar(stat="identity") # Rplot50
+
+# 내용유형별, 강사강의유형별, 총 교육인원(수강인원)
+graph <- arrange(aggregate(cbind(V53) ~ V16 + V18, mydata_sub, FUN=fun_sum_mean), V16, V18)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# graph
+ggplot(graph, aes(x=factor(V16), y=V53_mean, fill=graph$V18)) +
+  geom_bar(stat="identity") # Rplot51
+
+ggplot(graph, aes(x=factor(V16), y=V53_sum, fill=graph$V18)) +
+  geom_bar(stat="identity") # Rplot52
+
+# 내용유형별, 강사강의유형별, 총 교육인원(수강인원)
+graph <- arrange(aggregate(cbind(V53) ~ V9 + V16 + V18, mydata_sub, FUN=fun_sum_mean), V9, V16, V18)
+graph
+graph$V53_mean <- graph$V53[,2]
+graph$V53_sum <- graph$V53[,3]
+
+# graph
+dplot1 <- ggplot(graph, aes(x=factor(V9), y=V53_mean, fill=V16))
+dplot1 + geom_bar(stat="identity", position="dodge") # Rplot53
+
+dplot2 <- ggplot(graph, aes(x=factor(V9), y=V53_mean, fill=V18))
+dplot2 + geom_bar(stat="identity", position="dodge") # Rplot54
 
 
 ######################## 텍스트 분석 ##########################
@@ -662,9 +829,185 @@ wordcloud(words = df_word$Var1, #단어
           random.order = FALSE, #고빈도 단어 중앙 배치 yes
           rot.per = .1, #회전 단어 비율
           scale = c(4, 0.5), #단어 크기 범위
-          colors = pal) #색깔 목록
+          colors = pal) #색깔 목록 # Rplot_wc_01
+
+## 2014년에 개발한 콘텐츠 ##
+# wordcloud
+CN2014 <- mydata_sub %>% filter(V9 == 2014) %>% select(V7)
+
+# txt 파일로 저장
+write.csv(CN2014, file="CN2014.txt", row.names = FALSE)
+
+# 텍스트 마이닝
+# install package(rJava, memoise, KoNLP)
+install.packages("rJava")
+install.packages("memoise")
+install.packages("KoNLP")
+
+# load package
+library(KoNLP)
+library(dplyr)
+
+useNIADic()
+# 'C:/Users/user/AppData/Local/Temp/RtmpiOFTyv/remotes133ec7609268e/NIADic/inst/doc'
+
+# load text
+txt <- readLines("CN2014.txt")
+head(txt)
+txt
+
+# 특수문자 제거하기
+install.packages("stringr")
+library(stringr)
+
+# str_replace_all(대상, 변경할 패턴, 변경될 패턴) 
+# sub(), gsub()과 같은 기능
+# regex [:punct:] ~!@#$%^&*(){}_+:"<>?,./;'[]-=
+txt <- str_replace_all(txt, "!", "")
+txt <- str_replace_all(txt, ",", "")
+txt <- str_replace_all(txt, "/", "")
+txt <- str_replace_all(txt, ":", "")
+.
+.
+.
+#txt <- str_replace_all(txt, "[[:punct:]]", " ")
+txt
+write.csv(txt, file="CN2014.txt", row.names = FALSE)
+
+# 파일에서 명사 추출
+nouns <- extractNoun(txt)
+nouns
+# 추출한 명사 list를 문자열 벡터로 변환, 단어별 빈도표 생성
+wordcount <- table(unlist(nouns))
+
+# 데이터 프레임으로 변환
+df_word <- as.data.frame(wordcount, stringAsFactors = FALSE)
+
+# 변수명 수정
+#library(dplyr)
+#df_word <- rename(df_word, word=Var1, freq=Freq)
+
+# data type change
+df_word$Var1 <- as.character(df_word$Var1)
+str(df_word)
+
+# 두 글자 이상 단어 추출
+df_word <- filter(df_word, nchar(Var1) >= 2)
+
+top20 <- df_word %>% arrange(desc(Freq)) %>% head(20)
+top20
+
+# 워드 클라우드 만들기
+# install package (wordcloud)
+install.packages("wordcloud")
+
+# load packages
+library(wordcloud)
+library(RColorBrewer)
+
+# Dark2 색상 목록에서 8개 색상 추출
+pal <- brewer.pal(8, "Dark2")
+pal2 <- brewer.pal(9, "Blues")[5:9]
+
+wordcloud(words = df_word$Var1, #단어
+          freq = df_word$Freq, #빈도
+          min.freq = 2, #최소 단어 빈도
+          max.words = Inf, #표현 단어 수
+          random.order = FALSE, #고빈도 단어 중앙 배치 yes
+          rot.per = .1, #회전 단어 비율
+          scale = c(4, 0.5), #단어 크기 범위
+          colors = pal) #색깔 목록 # Rplot_wc_02
+
+## 2017년에 개발한 콘텐츠 ##
+# wordcloud
+CN2017 <- mydata_sub %>% filter(V9 == 2017) %>% select(V7)
+
+# txt 파일로 저장
+write.csv(CN2017, file="CN2017.txt", row.names = FALSE)
+
+# 텍스트 마이닝
+# install package(rJava, memoise, KoNLP)
+install.packages("rJava")
+install.packages("memoise")
+install.packages("KoNLP")
+
+# load package
+library(KoNLP)
+library(dplyr)
+
+useNIADic()
+# 'C:/Users/user/AppData/Local/Temp/RtmpiOFTyv/remotes133ec7609268e/NIADic/inst/doc'
+
+# load text
+txt <- readLines("CN2017.txt")
+head(txt)
+txt
+
+# 특수문자 제거하기
+install.packages("stringr")
+library(stringr)
+
+# str_replace_all(대상, 변경할 패턴, 변경될 패턴) 
+# sub(), gsub()과 같은 기능
+# regex [:punct:] ~!@#$%^&*(){}_+:"<>?,./;'[]-=
+txt <- str_replace_all(txt, "!", "")
+txt <- str_replace_all(txt, ",", "")
+txt <- str_replace_all(txt, "/", "")
+txt <- str_replace_all(txt, ":", "")
+.
+.
+.
+#txt <- str_replace_all(txt, "[[:punct:]]", " ")
+txt
+write.csv(txt, file="CN2017.txt", row.names = FALSE)
+
+# 파일에서 명사 추출
+nouns <- extractNoun(txt)
+nouns
+# 추출한 명사 list를 문자열 벡터로 변환, 단어별 빈도표 생성
+wordcount <- table(unlist(nouns))
+
+# 데이터 프레임으로 변환
+df_word <- as.data.frame(wordcount, stringAsFactors = FALSE)
+
+# 변수명 수정
+#library(dplyr)
+#df_word <- rename(df_word, word=Var1, freq=Freq)
+
+# data type change
+df_word$Var1 <- as.character(df_word$Var1)
+str(df_word)
+
+# 두 글자 이상 단어 추출
+df_word <- filter(df_word, nchar(Var1) >= 2)
+
+top20 <- df_word %>% arrange(desc(Freq)) %>% head(20)
+top20
+
+# 워드 클라우드 만들기
+# install package (wordcloud)
+install.packages("wordcloud")
+
+# load packages
+library(wordcloud)
+library(RColorBrewer)
+
+# Dark2 색상 목록에서 8개 색상 추출
+pal <- brewer.pal(8, "Dark2")
+pal2 <- brewer.pal(9, "Blues")[5:9]
+
+wordcloud(words = df_word$Var1, #단어
+          freq = df_word$Freq, #빈도
+          min.freq = 2, #최소 단어 빈도
+          max.words = Inf, #표현 단어 수
+          random.order = FALSE, #고빈도 단어 중앙 배치 yes
+          rot.per = .1, #회전 단어 비율
+          scale = c(4, 0.5), #단어 크기 범위
+          colors = pal) #색깔 목록 # Rplot_wc_03
 
 
+
+# aggregate
 #콘솔에 출력되는 행의 수가 21부터 줄여서 안 보임 -> options(), max.print 
 options(max.print=1000)
 options(digits=2)
