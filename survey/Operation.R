@@ -810,7 +810,7 @@ df_word <- filter(df_word, nchar(Var1) >= 2)
 top20 <- df_word %>% arrange(desc(Freq)) %>% head(20)
 top20
 
-# 워드 클라우드 만들기
+### 워드 클라우드 만들기 ###
 # install package (wordcloud)
 install.packages("wordcloud")
 
@@ -1005,7 +1005,267 @@ wordcloud(words = df_word$Var1, #단어
           scale = c(4, 0.5), #단어 크기 범위
           colors = pal) #색깔 목록 # Rplot_wc_03
 
+### 2018년에 개발한 콘텐츠 ###
+# wordcloud
+CN2018 <- mydata_sub %>% filter(V9 == 2018) %>% select(V7)
 
+# txt 파일로 저장
+write.csv(CN2018, file="CN2018.txt", row.names = FALSE)
+
+# 텍스트 마이닝
+# install package(rJava, memoise, KoNLP)
+install.packages("rJava")
+install.packages("memoise")
+install.packages("KoNLP")
+
+# load package
+library(KoNLP)
+library(dplyr)
+
+useNIADic()
+# 'C:/Users/user/AppData/Local/Temp/RtmpiOFTyv/remotes133ec7609268e/NIADic/inst/doc'
+
+# load text
+txt <- readLines("CN2018.txt")
+head(txt)
+txt
+
+# 특수문자 제거하기
+install.packages("stringr")
+library(stringr)
+
+# str_replace_all(대상, 변경할 패턴, 변경될 패턴) 
+# sub(), gsub()과 같은 기능
+# regex [:punct:] ~!@#$%^&*(){}_+:"<>?,./;'[]-=
+txt <- str_replace_all(txt, "!", "")
+txt <- str_replace_all(txt, ",", "")
+txt <- str_replace_all(txt, "/", "")
+txt <- str_replace_all(txt, ":", "")
+.
+.
+.
+#txt <- str_replace_all(txt, "[[:punct:]]", " ")
+txt
+write.csv(txt, file="CN2018.txt", row.names = FALSE)
+
+# 파일에서 명사 추출
+nouns <- extractNoun(txt)
+nouns
+# 추출한 명사 list를 문자열 벡터로 변환, 단어별 빈도표 생성
+wordcount <- table(unlist(nouns))
+
+# 데이터 프레임으로 변환
+df_word <- as.data.frame(wordcount, stringAsFactors = FALSE)
+
+# 변수명 수정
+#library(dplyr)
+#df_word <- rename(df_word, word=Var1, freq=Freq)
+
+# data type change
+df_word$Var1 <- as.character(df_word$Var1)
+str(df_word)
+
+# 두 글자 이상 단어 추출
+df_word <- filter(df_word, nchar(Var1) >= 2)
+
+top20 <- df_word %>% arrange(desc(Freq)) %>% head(20)
+top20
+
+# 워드 클라우드 만들기
+# install package (wordcloud)
+install.packages("wordcloud")
+
+# load packages
+library(wordcloud)
+library(RColorBrewer)
+
+# Dark2 색상 목록에서 8개 색상 추출
+pal <- brewer.pal(8, "Dark2")
+pal2 <- brewer.pal(9, "Blues")[5:9]
+
+wordcloud(words = df_word$Var1, #단어
+          freq = df_word$Freq, #빈도
+          min.freq = 2, #최소 단어 빈도
+          max.words = Inf, #표현 단어 수
+          random.order = FALSE, #고빈도 단어 중앙 배치 yes
+          rot.per = .1, #회전 단어 비율
+          scale = c(4, 0.5), #단어 크기 범위
+          colors = pal) #색깔 목록 # Rplot_wc_04
+
+### 2019년에 개발한 콘텐츠 ###
+# wordcloud
+CN2019 <- mydata_sub %>% filter(V9 == 2019) %>% select(V7)
+
+# txt 파일로 저장
+write.csv(CN2019, file="CN2019.txt", row.names = FALSE)
+
+# 텍스트 마이닝
+# install package(rJava, memoise, KoNLP)
+install.packages("rJava")
+install.packages("memoise")
+install.packages("KoNLP")
+
+# load package
+library(KoNLP)
+library(dplyr)
+
+useNIADic()
+# 'C:/Users/user/AppData/Local/Temp/RtmpiOFTyv/remotes133ec7609268e/NIADic/inst/doc'
+
+# load text
+txt <- readLines("CN2019.txt")
+head(txt)
+txt
+
+# 특수문자 제거하기
+install.packages("stringr")
+library(stringr)
+
+# str_replace_all(대상, 변경할 패턴, 변경될 패턴) 
+# sub(), gsub()과 같은 기능
+# regex [:punct:] ~!@#$%^&*(){}_+:"<>?,./;'[]-=
+txt <- str_replace_all(txt, "!", "")
+txt <- str_replace_all(txt, ",", "")
+txt <- str_replace_all(txt, "/", "")
+txt <- str_replace_all(txt, ":", "")
+.
+.
+.
+#txt <- str_replace_all(txt, "[[:punct:]]", " ")
+txt
+write.csv(txt, file="CN2019.txt", row.names = FALSE)
+
+# 파일에서 명사 추출
+nouns <- extractNoun(txt)
+nouns
+# 추출한 명사 list를 문자열 벡터로 변환, 단어별 빈도표 생성
+wordcount <- table(unlist(nouns))
+
+# 데이터 프레임으로 변환
+df_word <- as.data.frame(wordcount, stringAsFactors = FALSE)
+
+# 변수명 수정
+#library(dplyr)
+#df_word <- rename(df_word, word=Var1, freq=Freq)
+
+# data type change
+df_word$Var1 <- as.character(df_word$Var1)
+str(df_word)
+
+# 두 글자 이상 단어 추출
+df_word <- filter(df_word, nchar(Var1) >= 2)
+
+top20 <- df_word %>% arrange(desc(Freq)) %>% head(20)
+top20
+
+# 워드 클라우드 만들기
+# install package (wordcloud)
+install.packages("wordcloud")
+
+# load packages
+library(wordcloud)
+library(RColorBrewer)
+
+# Dark2 색상 목록에서 8개 색상 추출
+pal <- brewer.pal(8, "Dark2")
+pal2 <- brewer.pal(9, "Blues")[5:9]
+
+wordcloud(words = df_word$Var1, #단어
+          freq = df_word$Freq, #빈도
+          min.freq = 2, #최소 단어 빈도
+          max.words = Inf, #표현 단어 수
+          random.order = FALSE, #고빈도 단어 중앙 배치 yes
+          rot.per = .1, #회전 단어 비율
+          scale = c(4, 0.5), #단어 크기 범위
+          colors = pal) #색깔 목록 # Rplot_wc_05
+
+### 2020년 개발 중인 콘텐츠 ###
+# install package(rJava, memoise, KoNLP)
+install.packages("rJava")
+install.packages("memoise")
+install.packages("KoNLP")
+
+# load package
+library(KoNLP)
+library(dplyr)
+
+useNIADic()
+# 'C:/Users/user/AppData/Local/Temp/RtmpiOFTyv/remotes133ec7609268e/NIADic/inst/doc'
+
+# load text
+CN2020 <- read.csv("CN2020.csv", header = FALSE,
+                       stringsAsFactors = TRUE,
+                       na.strings = c("", " ", NA))
+
+write.csv(CN2020, file="CN2020.txt", row.names = FALSE)
+
+txt <- readLines("CN2020.txt")
+head(txt)
+txt
+
+# 특수문자 제거하기
+install.packages("stringr")
+library(stringr)
+
+# str_replace_all(대상, 변경할 패턴, 변경될 패턴) 
+# sub(), gsub()과 같은 기능
+# regex [:punct:] ~!@#$%^&*(){}_+:"<>?,./;'[]-=
+txt <- str_replace_all(txt, "!", "")
+txt <- str_replace_all(txt, ",", "")
+txt <- str_replace_all(txt, "/", "")
+txt <- str_replace_all(txt, ":", "")
+.
+.
+.
+#txt <- str_replace_all(txt, "[[:punct:]]", " ")
+txt
+write.csv(txt, file="CN2020.txt", row.names = FALSE)
+
+# 파일에서 명사 추출
+nouns <- extractNoun(txt)
+nouns
+# 추출한 명사 list를 문자열 벡터로 변환, 단어별 빈도표 생성
+wordcount <- table(unlist(nouns))
+
+# 데이터 프레임으로 변환
+df_word <- as.data.frame(wordcount, stringAsFactors = FALSE)
+
+# 변수명 수정
+#library(dplyr)
+#df_word <- rename(df_word, word=Var1, freq=Freq)
+
+# data type change
+df_word$Var1 <- as.character(df_word$Var1)
+str(df_word)
+
+# 두 글자 이상 단어 추출
+df_word <- filter(df_word, nchar(Var1) >= 2)
+
+top20 <- df_word %>% arrange(desc(Freq)) %>% head(20)
+top20
+
+# 워드 클라우드 만들기
+# install package (wordcloud)
+install.packages("wordcloud")
+
+# load packages
+library(wordcloud)
+library(RColorBrewer)
+
+# Dark2 색상 목록에서 8개 색상 추출
+pal <- brewer.pal(8, "Dark2")
+pal2 <- brewer.pal(9, "Blues")[5:9]
+
+wordcloud(words = df_word$Var1, #단어
+          freq = df_word$Freq, #빈도
+          min.freq = 2, #최소 단어 빈도
+          max.words = Inf, #표현 단어 수
+          random.order = FALSE, #고빈도 단어 중앙 배치 yes
+          rot.per = .1, #회전 단어 비율
+          scale = c(4, 0.5), #단어 크기 범위
+          colors = pal) #색깔 목록 # Rplot_wc_06
+
+###############################################################################
 
 # aggregate
 #콘솔에 출력되는 행의 수가 21부터 줄여서 안 보임 -> options(), max.print 
@@ -1420,4 +1680,3 @@ aggreSat %>% filter(V52 > 4.6)
 
 # save file
 # write.csv(mydata_01, file = "mydata.csv", row.names = FALSE)
-
