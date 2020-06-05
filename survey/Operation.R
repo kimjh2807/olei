@@ -1,3 +1,4 @@
+# 2020 수요조사
 # 온평원 2014-2019 운영실적 분석
 
 # set working directory
@@ -459,20 +460,47 @@ describe(mydata_sub[c("V19", "V25", "V37", "V40", "V46", "V53")],
 # describe.by()                 # psych
 
 # tapply()
-# 개발연도별 교육인원
+## 개발연도별 교육인원 합계 ##
 tapply(mydata_sub$V53, mydata_sub$V9, summary)
-tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
+apply <- tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
 
 # graph 그리기 준비
-graph <- tapply(mydata_sub$V53, mydata_sub$V9, mean, na.rm=TRUE)
+graph <- tapply(mydata_sub$V53, mydata_sub$V9, sum, na.rm=TRUE)
+typeof(graph)
+graph
+#barplot(graph)
+graph <- data.frame(graph)
+colnames(graph) <- "sum"
+rownames(graph)
+graph$year <- c(2005, 2007:2019)
+str(graph)
+graph <- round(graph, 0)
+graph
+
+# graph
+library(dplyr)
+library(ggplot2)
+
+# 개발연도별 교육인원 그래프
+graph %>% mutate(year=factor(year)) %>%
+  ggplot(aes(x=year, y=sum)) +
+  geom_bar(stat="identity", fill="steelblue", col="dodgerblue") +
+  labs(x="DevYear", y="Sum of Edu Pop") +
+  geom_text(aes(label=scales::comma(sum)), color="maroon", vjust=-0.5, size=4) # Rplot30
+
+## 개발연도별 수료인원 합계 ##
+complete <- tapply(mydata_sub$V54, mydata_sub$V9, sum, na.rm=TRUE)
+
+# graph 그리기 준비
+graph <- tapply(mydata_sub$V54, mydata_sub$V9, sum, na.rm=TRUE)
 typeof(graph)
 graph
 graph <- data.frame(graph)
-colnames(graph) <- "mean"
+colnames(graph) <- "sum"
 rownames(graph)
-str(graph)
-graph <- round(graph, 0)
 graph$year <- c(2005, 2007:2019)
+str(graph)
+graph
 
 # list -> data.frame
 #graph <- data.frame(matrix(unlist(graph), ncol=6, nrow=14, byrow=TRUE))
@@ -485,11 +513,41 @@ graph$year <- c(2005, 2007:2019)
 library(dplyr)
 library(ggplot2)
 
+# 개발연도별 수료인원 그래프
 graph %>% mutate(year=factor(year)) %>%
-  ggplot(aes(x=year, y=mean)) +
+  ggplot(aes(x=year, y=sum)) +
   geom_bar(stat="identity", fill="steelblue", col="dodgerblue") +
-  labs(x="DevYear", y="Mean of Edu Pop") +
-  geom_text(aes(label=scales::comma(mean)), color="maroon", vjust=-0.5, size=4) # Rplot30
+  labs(x="DevYear", y="Sum of Completed Learners") +
+  geom_text(aes(label=scales::comma(sum)), color="maroon", vjust=-0.5, size=4) # Rplot30_2
+
+# 개발연도별 교육인원 합계, 수료인원 합계
+apply
+str(apply)
+apply <- data.frame(apply)
+names(apply) <- "learners"
+apply$division <- rep("apply", times=14)
+apply$year <- c(2005, 2007:2019)
+
+complete
+str(complete)
+complete <- data.frame(complete)
+names(complete) <- "learners"
+complete$division <- rep("complete", times=14)
+complete$year <- c(2005, 2007:2019)
+
+DevYear <- data.frame(rbind(apply, complete))
+DevYear
+
+# graph
+ggplot(DevYear, aes(x=factor(year), y=learners, fill=division)) + 
+  geom_bar(position="dodge", stat="identity") +
+  scale_fill_manual(values=c("steelblue", "#fa9fb5")) #Rplot30_3
+  #geom_text(aes(label=learners), vjust=1.5, colour="white", position=position_dodge(.9), size=3)
+
+# graph
+ggplot(DevYear, aes(x=factor(year), y=learners, fill=division)) + 
+  geom_bar(stat="identity") +
+  scale_fill_manual(values=c("steelblue", "#fa9fb5"))  #Rplot30_4
 
 # 기술통계(요약)
 # create function(){} for descriptive statistics(summary)
@@ -1680,3 +1738,4 @@ aggreSat %>% filter(V52 > 4.6)
 
 # save file
 # write.csv(mydata_01, file = "mydata.csv", row.names = FALSE)
+
