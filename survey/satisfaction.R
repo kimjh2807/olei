@@ -115,7 +115,92 @@ satis %>% filter(V55 >= 0.43 & V56 >= 4.25) %>% select(c(V6, V53, V54))
 satis %>% filter(V55 >= 0.43 & V56 >= 4.5) %>% select(c(V6, V53, V54))
 
 # 수료율 > 0.43 (수료율 평균) & 만족도 >= 4.5
-satis %>% filter(V56 >= 4.25 & V56 <= 4.35) %>% select(c(V6, V53, V54)) %>% mutate(sum(V53))
+satis %>% filter(V56 >= 4.25 & V56 <= 4.35) %>% select(c(V6, V53, V54))
 
 # aggregate
 round(aggregate(V53~V57, satis, mean), 1)
+
+### wordcloud ###
+ContentName <- satis %>% filter(V56 >= 4.25 & V56 <= 4.35) %>% select(V6)
+
+# txt 파일로 저장
+write.csv(ContentName, file="ContentName.txt", row.names="FALSE")
+
+# 텍스트 마이닝
+install.packages("rJava")
+install.packages("memoise")
+install.packages("KoNLP")
+
+# load packages
+library(KoNLP)
+library(dplyr)
+
+# useNIADic()
+useNIADic()
+# 'C:/Users/user/AppData/Local/Temp/RtmpiOFTyv/remotes133ec7609268e/NIADic/inst/doc'
+
+# load text
+txt <- readLines("ContentName.txt")
+head(txt)
+txt
+
+# 특수문자 제거하기
+install.packages("stringr")
+library(stringr)
+
+# str_replace_all(대상, 변경할 패턴, 변경될 패턴) 
+# sub(), gsub()과 같은 기능
+# regex [:punct:] ~!@#$%^&*(){}_+:"<>?,./;'[]-=
+txt <- str_replace_all(txt, "!", "")
+txt <- str_replace_all(txt, ",", "")
+txt <- str_replace_all(txt, "/", "")
+txt <- str_replace_all(txt, ":", "")
+
+# 확인
+txt
+
+# 파일에서 명사 추출
+nouns <- extractNoun(txt)
+nouns
+# 추출한 명사 list를 문자열 벡터로 변환, 단어별 빈도표 생성
+wordcount <- table(unlist(nouns))
+
+# 데이터 프레임으로 변환
+df_word <- as.data.frame(wordcount, stringAsFactors = FALSE)
+
+# 변수명 수정
+#library(dplyr)
+#df_word <- rename(df_word, word=Var1, freq=Freq)
+
+# data type change
+df_word$Var1 <- as.character(df_word$Var1)
+str(df_word)
+
+# 두 글자 이상 단어 추출
+df_word <- filter(df_word, nchar(Var1) >= 2)
+
+top20 <- df_word %>% arrange(desc(Freq)) %>% head(20)
+top20
+
+### 워드 클라우드 만들기 ###
+# install package (wordcloud)
+install.packages("wordcloud")
+
+# load packages
+library(wordcloud)
+library(RColorBrewer)
+
+# Dark2 색상 목록에서 8개 색상 추출
+pal <- brewer.pal(8, "Dark2")
+pal2 <- brewer.pal(9, "Blues")[5:9]
+
+wordcloud(words = df_word$Var1, #단어
+          freq = df_word$Freq, #빈도
+          min.freq = 2, #최소 단어 빈도
+          max.words = Inf, #표현 단어 수
+          random.order = FALSE, #고빈도 단어 중앙 배치 yes
+          rot.per = .1, #회전 단어 비율
+          scale = c(4, 0.5), #단어 크기 범위
+          colors = pal) #색깔 목록
+
+# Rplot_wc_07
