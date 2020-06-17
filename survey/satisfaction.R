@@ -28,7 +28,7 @@ mydata_sat <- mydata_sat %>% convert(num(V49:V52, V55))
 str(mydata_sat)
 #write.csv(mydata_sat, file="mydata_sat.csv", row.names = FALSE)
 
-# load library
+# load data
 satis <- mydata_sat %>% select(V6, V49:V55)
 str(satis)
 
@@ -51,15 +51,44 @@ satis <- satis %>% mutate(V56=(V49+V50+V51+V52)/4)
 satis$V56 <- round(satis$V56, 2)
 summary(satis)
 
+# graph
+library(ggplot2)
+
 # 만족도 평균 분포도
-plot(satis$V56)
-hist(satis$V56)
+plot(satis$V56) #Rplot55
+
+# 4.25를 기준으로 구분한 plot
+satis$cut <- cut(satis$V56, breaks=c(-Inf, 4.25, Inf)) 
+ggplot(satis, aes(x=V6, y=V56, colour=cut)) + 
+  geom_point() #Rplot56
+
+# histogram
+hist(satis$V56) #Rplot57
 hist(log10(satis$V56))
+
+# boxplot
 boxplot(satis$V56)
 qqline(satis$V56)
-barplot(table(satis$V56))
+
+# barplot
+barplot(table(satis$V56)) #Rplot58
+
+# pairs
+pairs(satis)
+pairs(satis[,2:9]) #Rplot59
 
 ### 상관관계(correlation) ###
+# 상관계수행렬도
+scor <- round(cor(satis[,2:9]), 2)
+
+library(corrplot)
+corrplot(scor) #Rplot60
+
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+
+corrplot(scor, method="shade", shade.col=NA, tl.col="black", tl.srt=45,
+         col=col(200), addCoef.col="black", addcolorlabel="no", order="AOE") #Rplot61
+
 # 만족도평균 - 교육인원
 cor(satis$V56, satis$V53)
 
@@ -201,6 +230,6 @@ wordcloud(words = df_word$Var1, #단어
           random.order = FALSE, #고빈도 단어 중앙 배치 yes
           rot.per = .1, #회전 단어 비율
           scale = c(4, 0.5), #단어 크기 범위
-          colors = pal) #색깔 목록
+          colors = pal) #색깔 목록 # Rplot_wc_07
 
-# Rplot_wc_07
+###
