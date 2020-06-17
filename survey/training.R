@@ -29,14 +29,7 @@ mydata %>% ggplot(aes(x=V27)) + geom_histogram()
 mydata %>% ggplot(aes(x=V27)) + geom_freqpoly()
 
 # 산점도 행렬
-sampling <- mydata %>% select(c(V3, V16, V22, V27, V28))
-pairs(sampling %>% sample_n(100000))
-
-pairs(mydata %>% select(
-      sample_n(min(1000, nrow(mydata))),
-      lower.panel=function(x,y){ point(x,y); abline(0, 1, col='red')},
-      upper.panel=panel.cor)
-
+pairs(mydata %>% dplyr::select(V3, V16, V22, V27, V28) %>% sample_n(1000))
 
 # correlation coefficient
 cor(mydata$V27, mydata$V28)
