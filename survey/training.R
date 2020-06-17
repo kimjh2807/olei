@@ -21,15 +21,15 @@ class(mydata)
 str(mydata)
 summary(mydata)
 
-# histogram()
-table(mydata$V27)
-plot(table(mydata$V27))
+# 수료인원 histogram()
+table(mydata$V28)
+plot(table(mydata$V28))
 
-mydata %>% ggplot(aes(x=V27)) + geom_histogram()
-mydata %>% ggplot(aes(x=V27)) + geom_freqpoly()
+mydata %>% ggplot(aes(x=V28)) + geom_histogram()
+mydata %>% ggplot(aes(x=V28)) + geom_freqpoly()
 
 # 산점도 행렬
-pairs(mydata %>% dplyr::select(V3, V16, V22, V27, V28) %>% sample_n(1000))
+pairs(mydata %>% dplyr::select(V27, V28) %>% sample_n(1000))
 
 # correlation coefficient
 cor(mydata$V27, mydata$V28)
@@ -43,10 +43,20 @@ ComRatelm <- lm(V28 ~ V27, data=mydata)
 summary(ComRatelm)
 # V28=0.007+0.867*V27
 
-# 대분류별 수료인원
-mydata %>% ggplot(aes(V17, V28)) + geom_boxplot()
+# 전체(2018, 2019), 실시인원, 수료인원, 재직여부, 대분류별
+mydata %>% 
+  ggplot(aes(V27, V28, colour=V17)) + 
+  geom_point() +
+  facet_wrap(~V6)
 
+# 전체(2018, 2019), 실시인원, 수료인원, 훈련유형, 대분류별
+mydata %>% 
+  ggplot(aes(V27, V28, colour=V18)) + 
+  geom_point() +
+  facet_wrap(~V6)
 
-
-
-
+# 전체(2018, 2019), 실시인원, 수료인원, 훈련방법, 대분류별
+mydata %>% 
+  ggplot(aes(V27, V28, colour=V19)) + 
+  geom_point() +
+  facet_wrap(~V6)
