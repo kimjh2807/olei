@@ -42,7 +42,7 @@ corrplot(pcor,
 # 상관행렬
 pairs(mydata %>% dplyr::select(V27, V28) %>% sample_n(1000))
 
-# correlation coefficient
+# 수강인원 수료인원 correlation coefficient
 cor(mydata$V27, mydata$V28)
 with(mydata, cor(V27, V28))
 
@@ -74,19 +74,128 @@ summary(ComRatelm)
 # 전체(2018, 2019), 실시인원, 수료인원, 재직여부(colour), 대분류별
 mydata %>% 
   ggplot(aes(V27, V28, colour=V17)) + 
-  geom_point(size=0.8, alpha=0.1) +
-  facet_wrap(~V5)
+  geom_point(size=1, alpha=0.1) +
+  facet_wrap(~V5) #Rplot
 
 # 전체(2018, 2019), 실시인원, 수료인원, 훈련유형(colour), 대분류별
 mydata %>% 
   ggplot(aes(V27, V28, colour=V18)) + 
-  geom_point(size=0.8, alpha=0.1) +
-  facet_wrap(~V5)
+  geom_point(size=1, alpha=0.5) +
+  facet_wrap(~V5) #Rplot 
 
 # 전체(2018, 2019), 실시인원, 수료인원, 훈련방법(colour), 대분류별
 mydata %>% 
   ggplot(aes(V27, V28, colour=V19)) + 
-  geom_point(size=0.8, alpha=0.1) +
-  facet_wrap(~V5)
+  geom_point(size=1, alpha=0.5) +
+  facet_wrap(~V5) #Rplot
 
-# 
+# 전체(2018, 2019), 실시인원, 수료인원, 재직여부별
+mydata %>% 
+  ggplot(aes(V27, V28, colour=V19)) + 
+  geom_point(size=1, alpha=0.5) +
+  facet_wrap(~V17) #Rplot
+
+### 2019년, 훈련과정 ###
+# 2019년, 대분류수
+mydata %>%
+  filter(V1 == 2019) %>%
+  ggplot(aes(factor(V5))) +
+  geom_bar() #Rplot
+
+# 2019년, 훈련과정(중복제거), 대분류수
+mydata %>%
+  filter(V1 == 2019) %>%
+  distinct(V4, .keep_all=TRUE) %>%
+  ggplot(aes(factor(V5))) +
+  geom_bar() #Rplot
+
+# 2019년, 중분류수
+mydata %>%
+  filter(V1 == 2019) %>%
+  ggplot(aes(factor(V7))) +
+  geom_bar()
+
+# 2019년, 훈련과정(중복제거), 중분류수
+mydata %>%
+  filter(V1 == 2019) %>%
+  distinct(V4, .keep_all=TRUE) %>%
+  ggplot(aes(factor(V7))) +
+  geom_bar()
+
+# 2019년, 소분류수
+mydata %>%
+  filter(V1 == 2019) %>%
+  ggplot(aes(factor(V9))) +
+  geom_bar()
+
+# 2019년, 훈련과정(중복제거), 소분류수
+mydata %>%
+  filter(V1 == 2019) %>%
+  distinct(V4, .keep_all=TRUE) %>%
+  ggplot(aes(factor(V7))) +
+  geom_bar()
+
+# 2019년, 세분류수
+mydata %>%
+  filter(V1 == 2019) %>%
+  ggplot(aes(factor(V11))) +
+  geom_bar()
+
+# 2019년, 훈련과정(중복제거), 세분류수
+mydata %>%
+  filter(V1 == 2019) %>%
+  distinct(V4, .keep_all=TRUE) %>%
+  ggplot(aes(factor(V11))) +
+  geom_bar()
+
+# 2019년, 대분류별 그룹, 대분류그룹수(훈련과정수) > 2000
+mydata %>%
+  filter(V1 == 2019) %>%
+  group_by(V5) %>%
+  tally() %>%
+  filter(n >= 2000) %>%
+  ggplot(aes(factor(V5), n)) +
+  geom_col()
+
+# 2019년, 중분류별 그룹, 중분류그룹수(훈련과정수) > 2000
+mydata %>%
+  filter(V1 == 2019) %>%
+  group_by(V7) %>%
+  tally() %>%
+  filter(n >= 2000) %>%
+  ggplot(aes(factor(V7), n)) +
+  geom_col()
+
+# 2019년, 소분류별 그룹, 소분류그룹수(훈련과정수) > 2000
+mydata %>%
+  filter(V1 == 2019) %>%
+  group_by(V9) %>%
+  tally() %>%
+  filter(n >= 2000) %>%
+  ggplot(aes(factor(V9), n)) +
+  geom_col()
+
+# 2019년, 세분류별 그룹, 세분류그룹수(훈련과정수) > 2000
+mydata %>%
+  filter(V1 == 2019) %>%
+  group_by(V11) %>%
+  tally() %>%
+  filter(n >= 2000) %>%
+  ggplot(aes(factor(V11), n)) +
+  geom_col()
+
+
+### 2019년, 수료인원 ###
+# 2019년, 재직자, 실시인원, 수료인원, 훈련방법
+mydata %>%
+  filter(V1 == 2019) %>%
+  filter(V17 == "재직자") %>%
+  ggplot(aes(V27, V28, colour=V19)) +
+  geom_point(size=1, alpha=0.8)
+
+# 2019년, 실업자, 실시인원, 수료인원, 훈련방법
+mydata %>%
+  filter(V1 == 2019) %>%
+  filter(V17 == "실업자") %>%
+  ggplot(aes(V27, V28, colour=V19)) +
+  geom_point(size=1, alpha=0.8)
