@@ -22,14 +22,15 @@ str(mydata)
 summary(mydata)
 
 # 수료인원 histogram()
-barplot(mydata[["V28"]]) #Rplot
-plot(table(mydata$V28)) #Rplot
-hist(mydata[["V28"]], breaks=100) #Rplot
+barplot(mydata[["V28"]]) #Rplot01
+plot(table(mydata$V28))
+hist(mydata[["V28"]], breaks=100)
 
-mydata %>% ggplot(aes(x=V28)) + geom_histogram()  #Rplot
-mydata %>% ggplot(aes(x=V28)) + geom_freqpoly()  #Rplot
+mydata %>% ggplot(aes(x=V28)) + geom_histogram()  #Rplot02
+mydata %>% ggplot(aes(x=V28)) + geom_freqpoly()
 
 # 상관관계행렬 그래프
+#install.packages("corrplot")
 library(corrplot)
 pcor <- round(cor(mydata[,c(3, 22, 27:28)]), 2)
 corrplot(pcor,
@@ -37,17 +38,19 @@ corrplot(pcor,
          addshade="all",
          tl.srt=30,
          diag=FALSE,
-         addCoef.col="black") #order="FPC" #Rplot
+         addCoef.col="black") #order="FPC" #Rplot03
 
 # 상관행렬
 pairs(mydata %>% dplyr::select(V27, V28) %>% sample_n(1000))
 
-# 수강인원 수료인원 correlation coefficient
+# 수강인원, 수료인원 correlation coefficient
 cor(mydata$V27, mydata$V28)
 with(mydata, cor(V27, V28))
 
-# linear regression
-ggplot(mydata, aes(V27, V28)) + geom_jitter() + geom_smooth(method="lm")
+# 수강인원, 수료인원 linear regression
+ggplot(mydata, aes(V27, V28)) + 
+  geom_jitter(aes(alpha=0.5)) + 
+  geom_smooth(method="lm") #Rplot04
 
 # hexbin graph
 install.packages("hexbin")
@@ -70,6 +73,25 @@ ggplot(mydata, aes(V27, V28)) +
 ComRatelm <- lm(V28 ~ V27, data=mydata)
 summary(ComRatelm)
 # V28=0.007+0.867*V27
+
+#훈련비(총지원금), 수료인원
+CMcor <- lm(V28 ~ V25, data=mydata)
+summary(CMcor)
+# V28=9.840+1.285*V25
+
+### 훈련과정명, 훈련과정명, 재직여부, 훈련유형, 훈련방법, 실시인원, 수료인원 ###
+aggregate(cbind(V27, V28) ~ V4 + V17, mydata, mean)
+#aggregate로는 피벗이 어려움
+
+#dplyr, group_by, summarise를 활용
+mydata %>%
+  filter(V5 %in% c(2)) %>%
+  group_by(V4, V6, V17, V18, V19) %>%
+  summarise(EduSum=sum(V27),
+            CmpSum=sum(V28),
+            CmpRate=round(sum(V28)/sum(V27), 2)) %>%
+  arrange(-CmpSum)
+
 
 # 전체(2018, 2019), 실시인원, 수료인원, 재직여부(colour), 대분류별
 mydata %>% 
@@ -199,3 +221,5 @@ mydata %>%
   filter(V17 == "실업자") %>%
   ggplot(aes(V27, V28, colour=V19)) +
   geom_point(size=1, alpha=0.8)
+
+
