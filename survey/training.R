@@ -102,6 +102,8 @@ mydata %>%
   ggplot(aes(x=factor(reorder(V17, -V28)), y=V28)) +
   geom_col(fill="steelblue", color="grey50") #Rplot05
 
+### 2019년 ###
+---------------------------------------------------------------------
 # 2019년, 재직여부, 훈련유형, 실시인원, 수료인원, 수료율 
 mydata %>%
   filter(V1 == 2019) %>%
@@ -191,6 +193,8 @@ mydata %>%
   facet_wrap(~V19) #Rplot12
 
 ### 훈련과정명 기준 ###
+--------------------------------------------------------------------
+
 # 2019년, 훈련과정명 기준, 실시인원, 수료인원, 수료율
 # 훈련과정별, 수료인원 순, 재직여부
 mydata %>%
@@ -206,6 +210,7 @@ mydata %>%
   geom_bar(stat="identity") #Rplot13
 
 ### 대분류기준 ###
+-------------------------------------------------------------------
 # 2019년, 대분류코드, 훈련과정 수
 mydata %>%
   filter(V1 == 2019) %>%
@@ -303,6 +308,9 @@ mydata %>%
   spread(V19, V28)
 
 
+### 전체(2018, 2019) ###
+----------------------------------------------------------------------
+
 # 전체(2018, 2019), 실시인원, 수료인원, 재직여부(color), 대분류별
 mydata %>% 
   ggplot(aes(V27, V28, colour=V17)) + 
@@ -321,7 +329,448 @@ mydata %>%
   geom_point(size=1, alpha=0.5) +
   facet_wrap(~V5) #Rplot20
 
+### 기술공학분야만 ###
+----------------------------------------------------------------------
+
+# 대분류로 필터, 연도별(2018, 2019), 실시인원, 수료인원
+mydata %>%
+  filter(V5 == c(8,9,14,15,16,17,19,20,22,23)) %>%
+  ggplot(aes(V27, V28, colour=factor(V1))) +
+  geom_point(size=1, alpha=0.7) +
+  facet_wrap(~V5)
+
+# 8 문화예술디자인방송
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 8) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 8) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 8) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_8_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 8) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_8_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 8) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_8_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 8) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 9 운전운송
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 9) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 9) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 9) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_9_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 9) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_9_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 9) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_9_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 9) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 14 건설
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 14) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 14) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 14) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_14_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 14) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_14_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 14) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_14_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 14) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 15 기계
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 15) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 15) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 15) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_15_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 15) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_15_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 15) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_15_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 15) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 16 재료
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 16) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 16) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 16) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_16_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 16) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_16_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 16) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_16_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 16) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 17 화학
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 17) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 17) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 17) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_17_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 17) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_17_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 17) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_17_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 17) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 19 전기전자
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 19) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 19) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 19) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_19_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 19) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_19_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 19) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_19_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 19) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 20 정보통신
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 20) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 20) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 20) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_20_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 20) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_20_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 20) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_20_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 20) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 22 인쇄목재가구공예
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 22) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 22) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 22) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_22_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 22) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_22_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 22) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_22_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 22) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
+# 23 환경에너지안전
+----------------------------------------------------------------------
+# 대분류
+mydata %>%
+  filter(V5 == 23) %>%
+  ggplot(aes(V27, V28)) +
+  geom_point()
+
+# 대분류, 중분류
+mydata %>%
+  filter(V5 == 23) %>%
+  ggplot(aes(V27, V28, colour=factor(V7))) +
+  geom_point() +
+  facet_wrap(~V7)
+
+# 대분류, 소분류
+mydata %>%
+  filter(V5 == 23) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V9) #Rplot21_23_1
+
+# 대분류, 소분류, 훈련유형(V18)
+mydata %>%
+  filter(V5 == 23) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V18) #Rplot21_23_2
+
+# 대분류, 소분류, 훈련방법(V19)
+mydata %>%
+  filter(V5 == 23) %>%
+  ggplot(aes(V27, V28, colour=factor(V9))) +
+  geom_point() +
+  facet_wrap(~V19) #Rplot21_23_3
+
+# 대분류, 세분류
+mydata %>%
+  filter(V5 == 23) %>%
+  ggplot(aes(V27, V28, colour=factor(V11))) +
+  geom_point() +
+  facet_wrap(~V11)
+
 ### 2019년, 훈련과정 ###
+-----------------------------------------------------------------------
 # 2019년, 대분류수
 mydata %>%
   filter(V1 == 2019) %>%
