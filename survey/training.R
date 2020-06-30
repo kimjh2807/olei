@@ -87,7 +87,44 @@ aggregate(cbind(V27, V28) ~ V4 + V17, mydata, mean)
 library(tidyr)
 library(dplyr)
 
+# 지수표시 X
+options(scipen=999)
+
+### 2018년 ###
+-------------------------------------------------------------------------------
+# 2018년, 재직여부 기준, 실시인원, 수료인원, 수료율 
+mydata %>%
+  filter(V1 == 2018) %>%
+  group_by(V17) %>%
+  summarise(n=n(),
+            V27=sum(V27),
+            V28=sum(V28),
+            V28Rate=round(V28/V27, 2)) %>%
+  mutate(per=paste0(round(V28/sum(V28)*100, 2))) %>%
+  data.frame() %>%
+  select(V17, V28) %>%
+  ggplot(aes(x=factor(reorder(V17, -V28)), y=V28)) +
+  geom_col(fill="steelblue", color="grey50") #Rplot05_1
+
+# 2018년, 재직여부, 훈련유형, 실시인원, 수료인원, 수료율 
+mydata %>%
+  filter(V1 == 2018) %>%
+  group_by(V17, V18) %>%
+  summarise(n=n(),
+            V27=sum(V27),
+            V28=sum(V28),
+            V28Rate=round(V28/V27, 2)) %>%
+  mutate(per=paste0(round(V28/sum(V28)*100, 2))) %>%
+  data.frame() %>%
+  select(V17, V18, V28) %>%
+  ggplot(aes(x=factor(reorder(V17, -V28)), y=V28, fill=V18)) +
+  geom_col(position="dodge2", color="grey50") #Rplot06_1
+
+###*** 2018 직업능력개발사업 통계연보와 수치가 유사함 *** ###
+###*** 이하는 2019년 중심으로 분석 *** ###
+
 ### 2019년 ###
+-------------------------------------------------------------------------------
 # 2019년, 재직여부 기준, 실시인원, 수료인원, 수료율 
 mydata %>%
   filter(V1 == 2019) %>%
@@ -95,15 +132,13 @@ mydata %>%
   summarise(n=n(),
             V27=sum(V27),
             V28=sum(V28),
-            V28Rate=round(sum(V28)/sum(V27), 2)) %>%
+            V28Rate=round(V28/V27, 2)) %>%
   mutate(per=paste0(round(V28/sum(V28)*100, 2))) %>%
   data.frame() %>%
   select(V17, V28) %>%
   ggplot(aes(x=factor(reorder(V17, -V28)), y=V28)) +
   geom_col(fill="steelblue", color="grey50") #Rplot05
 
-### 2019년 ###
----------------------------------------------------------------------
 # 2019년, 재직여부, 훈련유형, 실시인원, 수료인원, 수료율 
 mydata %>%
   filter(V1 == 2019) %>%
@@ -111,7 +146,7 @@ mydata %>%
   summarise(n=n(),
             V27=sum(V27),
             V28=sum(V28),
-            V28Rate=round(sum(V28)/sum(V27), 2)) %>%
+            V28Rate=round(V28/V27, 2)) %>%
   mutate(per=paste0(round(V28/sum(V28)*100, 2))) %>%
   data.frame() %>%
   select(V17, V18, V28) %>%
