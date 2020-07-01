@@ -79,7 +79,8 @@ CMcor <- lm(V28 ~ V25, data=mydata)
 summary(CMcor)
 # V28=9.840+1.285*V25
 
-### 훈련과정명, 훈련과정명, 재직여부, 훈련유형, 훈련방법, 실시인원, 수료인원 ###
+### 훈련과정명, 재직여부, 훈련유형, 훈련방법, 실시인원, 수료인원 ###
+aggregate(cbind(V27, V28) ~ V4, mydata, mean)
 aggregate(cbind(V27, V28) ~ V4 + V17, mydata, mean)
 #aggregate로는 피벗이 어려움
 
@@ -92,7 +93,7 @@ options(scipen=999)
 
 ### 2018년 ###
 -------------------------------------------------------------------------------
-# 2018년, 재직여부 기준, 실시인원, 수료인원, 수료율 
+# 2018년, 재직여부, 훈련유형, 실시인원, 수료인원, 수료율 
 mydata %>%
   filter(V1 == 2018) %>%
   group_by(V17) %>%
@@ -100,11 +101,11 @@ mydata %>%
             V27=sum(V27),
             V28=sum(V28),
             V28Rate=round(V28/V27, 2)) %>%
-  mutate(per=paste0(round(V28/sum(V28)*100, 2))) %>%
+  mutate(percent=paste0(round(V28/sum(V28)*100, 1))) %>%
   data.frame() %>%
   select(V17, V28) %>%
   ggplot(aes(x=factor(reorder(V17, -V28)), y=V28)) +
-  geom_col(fill="steelblue", color="grey50") #Rplot05_1
+  geom_col(fill="steelblue", color="grey50") #Rplot05_1  
 
 # 2018년, 재직여부, 훈련유형, 실시인원, 수료인원, 수료율 
 mydata %>%
@@ -114,7 +115,7 @@ mydata %>%
             V27=sum(V27),
             V28=sum(V28),
             V28Rate=round(V28/V27, 2)) %>%
-  mutate(per=paste0(round(V28/sum(V28)*100, 2))) %>%
+  mutate(percent=paste0(round(V28/sum(V28)*100, 1))) %>%
   data.frame() %>%
   select(V17, V18, V28) %>%
   ggplot(aes(x=factor(reorder(V17, -V28)), y=V28, fill=V18)) +
@@ -125,7 +126,7 @@ mydata %>%
 
 ### 2019년 ###
 -------------------------------------------------------------------------------
-# 2019년, 재직여부 기준, 실시인원, 수료인원, 수료율 
+# 2019년, 재직여부, 실시인원, 수료인원, 수료율 
 mydata %>%
   filter(V1 == 2019) %>%
   group_by(V17) %>%
@@ -133,7 +134,7 @@ mydata %>%
             V27=sum(V27),
             V28=sum(V28),
             V28Rate=round(V28/V27, 2)) %>%
-  mutate(per=paste0(round(V28/sum(V28)*100, 2))) %>%
+  mutate(percent=paste0(round(V28/sum(V28)*100, 1))) %>%
   data.frame() %>%
   select(V17, V28) %>%
   ggplot(aes(x=factor(reorder(V17, -V28)), y=V28)) +
@@ -147,7 +148,7 @@ mydata %>%
             V27=sum(V27),
             V28=sum(V28),
             V28Rate=round(V28/V27, 2)) %>%
-  mutate(per=paste0(round(V28/sum(V28)*100, 2))) %>%
+  mutate(percent=paste0(round(V28/sum(V28)*100, 1))) %>%
   data.frame() %>%
   select(V17, V18, V28) %>%
   ggplot(aes(x=factor(reorder(V17, -V28)), y=V28, fill=V18)) +
@@ -158,6 +159,7 @@ mydata %>%
   filter(V1 == 2019) %>%
   group_by(V17) %>%
   summarise(n=n()) %>%
+  mutate(percent=paste0(round(n/sum(n)*100, 1))) %>%
   data.frame() %>%
   select(V17, n) %>%
   ggplot(aes(x=factor(reorder(V17, -n)), y=n)) +
@@ -171,6 +173,7 @@ mydata %>%
   filter(V1 == 2019) %>%
   group_by(V17, V18) %>%
   summarise(n=n()) %>%
+  mutate(percent=paste0(round(n/sum(n)*100, 1))) %>%  
   data.frame() %>%
   select(V17, V18, n) %>%
   ggplot(aes(x=factor(reorder(V17, -n)), y=n, fill=V18)) +
@@ -181,6 +184,7 @@ mydata %>%
   filter(V1 == 2019) %>%
   group_by(V17, V19) %>%
   summarise(n=n()) %>%
+  mutate(percent=paste0(round(n/sum(n)*100, 1))) %>%
   data.frame() %>%
   select(V17, V19, n) %>%
   ggplot(aes(x=factor(reorder(V17, -n)), y=n, fill=V19)) +
@@ -192,55 +196,64 @@ mydata %>%
   group_by(V17, V19) %>%
   summarise(n=n(),
             V28=sum(V28)) %>%
+  mutate(percent=paste0(round(V28/sum(V28)*100, 1))) %>%
   data.frame() %>%
   select(V17, V19, V28) %>%
   ggplot(aes(x=factor(reorder(V17, -V28)), y=V28, fill=V19)) +
   geom_col(position="dodge2", color="grey50") #Rplot10
-
-# 2019년, 재직여부, 훈련유형, 훈련방법, 실시인원, 수료인원, 수료율 
-mydata %>%
-  filter(V1 == 2019) %>%
-  group_by(V17, V18, V19) %>%
-  summarise(n=n(),
-            V27=sum(V27),
-            V28=sum(V28),
-            V28Rate=round(sum(V28)/sum(V27), 2))
 
 # 2019년, 재직여부, 훈련유형, 훈련방법, 운영과정 수
 mydata %>%
   filter(V1 == 2019) %>%
   group_by(V17, V18, V19) %>%
   summarise(n=n()) %>%
+  mutate(percent=paste0(round(n/sum(n)*100, 1))) %>%
+  data.frame() %>%
   ggplot(aes(x=factor(reorder(V17, -n)), y=n, fill=V18)) +
   geom_col(position="dodge2", color="grey50") +
   facet_wrap(~V19) #Rplot11
 
-# 2019년, 재직여부, 훈련유형, 훈련방법, 수료인원
+# 2019년, 재직여부, 훈련유형, 훈련방법, 운영과정수, 실시인원, 수료인원, 수료율, percent
 mydata %>%
   filter(V1 == 2019) %>%
   group_by(V17, V18, V19) %>%
   summarise(n=n(),
             V27=sum(V27),
             V28=sum(V28),
-            V28Rate=round(sum(V28)/sum(V27), 2)) %>%
+            V28Rate=round(V28/V27, 2)) %>%
+  mutate(percent=paste0(round(V28/sum(V28)*100, 1))) %>%
+  data.frame() %>%
   ggplot(aes(x=factor(reorder(V17, -V28)), y=V28, fill=V18)) +
   geom_col(position="dodge2", color="grey50") +
   facet_wrap(~V19) #Rplot12
 
 ### 훈련과정명 기준 ###
 --------------------------------------------------------------------
-
-# 2019년, 훈련과정명 기준, 실시인원, 수료인원, 수료율
-# 훈련과정별, 수료인원 순, 재직여부
+# 훈련과정명, 실시인원, 수료인원, 수료율, percent
 mydata %>%
   filter(V1 == 2019) %>%
-  group_by(V4, V5, V17, V18, V19) %>%
+  distinct(V4, .keep_all=TRUE) %>%
+  head(10)
+
+#  ggplot(aes(factor(V7))) +
+  geom_bar()
+
+  
+mydata %>%
+  head(10)
+
+
+#  group_by(factor(V4)) %>%
   summarise(n=n(),
             V27=sum(V27),
             V28=sum(V28),
-            V28Rate=round(sum(V28)/sum(V27), 2)) %>%
-  arrange(-V28) %>%
-  head(50) %>%
+            V28Rate=round(V28/V27, 2)) %>%
+  data.frame() -> data_sample
+
+#  head(50)
+
+#%>%
+  data.frame()
   ggplot(aes(x=V4, y=V28, fill=V17)) +
   geom_bar(stat="identity") #Rplot13
 
