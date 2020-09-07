@@ -43,20 +43,30 @@ time.sleep(1)
 driver.find_element_by_xpath('//*[@id="body"]/div/div/div/div[3]').click()
 time.sleep(3)
 
-# 로그인되었으나, e-koreatech 관리자 페이지가 아님, 관리지 페이지로 리다이렉트
-# 아이디로 관리자 주소를 확인하고 입력해 줌
+# 로그인되었으나, e-koreatech 관리자 페이지가 아님, 관리자 페이지로 리다이렉트해 줌
+# 로그인한 아이디로 관리자 주소를 확인하고 입력해 줌
 driver.get("https://sa.step.or.kr:11443/page/stepsa?m1=home%25")
+time.sleep(2)
 
 # 홈 메뉴 클릭
 driver.find_element_by_xpath('/html/body/div[2]/div[1]/div[3]/div[3]/div').click()
+time.sleep(2)
 
 # 운영준비 > 기수개설관리 메뉴로 곧바로 이동
 driver.get("https://sa.step.or.kr:11443/page/stepsa?m1=operation_manage%2Fterm%25")
+time.sleep(2)
 
-# 필터정보 입력
+# 14기 기수로 바로 접속
+driver.get("https://sa.step.or.kr:11443/page/stepsa?m1=operation_manage%2Fcourse%25&status_code_list=1%2C2%2C3%2C4%2C6%2C5%25&institution_id=1%25&organization_id=-1%25&term_type_code=2%25&term_year=2020%25&term_id=2356%25")
+driver.implicitly_wait(10)
+
+# 수강신청 인원 정보 테이블를 찾고, 테이블 속에 tr, td 태그들의 정보를 불러옴
+SugangTable = driver.find_element_by_xpath('//*[@id="wrapper"]/div[1]/div/div/div[3]/div[1]/div/table/tbody')
+for tr in SugangTable.find_elements_by_tag_name('tr'):
+    td = tr.find_elements_by_tag_name('td')
+    info = "{}, {}\n".format(td[4].text, td[9].text)
+    print (info)
+
 # 게시판에서 필요한 데이터 크롤링 하기
 # 또는 엑셀 파일 다운로드 하기'''
-
-
-
 
