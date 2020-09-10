@@ -61,12 +61,9 @@ driver.get("https://sa.step.or.kr:11443/page/stepsa?m1=operation_manage%2Fcourse
 driver.implicitly_wait(10)
 
 # 수강신청 인원 정보 테이블를 찾고, 테이블 속에 tr, td 태그들의 정보를 불러옴
+# 게시판에서 필요한 데이터 크롤링 하기
 SugangTable = driver.find_element_by_xpath('//*[@id="wrapper"]/div[1]/div/div/div[3]/div[1]/div/table/tbody')
 for tr in SugangTable.find_elements_by_tag_name('tr'):
     td = tr.find_elements_by_tag_name('td')
-    info = "{}, {}\n".format(td[4].text, td[9].text)
-    print (info)
-
-# 게시판에서 필요한 데이터 크롤링 하기
-# 또는 엑셀 파일 다운로드 하기'''
-
+    info = "{}, {}, {}".format(td[1].text, td[4].text, td[9].text)
+    print(info)
