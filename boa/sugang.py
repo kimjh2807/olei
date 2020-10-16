@@ -34,9 +34,9 @@ driver.maximize_window()
 time.sleep(2)
 
 # 소스코드에서 아이디(id), 비번(pw)의 파라미터 확인하고 입력하기
-driver.find_element_by_id('id_input').send_keys('ekoreatech14@koreatech.ac.kr')
+driver.find_element_by_id('id_input').send_keys('id')
 time.sleep(1)
-driver.find_element_by_id('pw_input').send_keys('e-koreatech1')
+driver.find_element_by_id('pw_input').send_keys('pw')
 time.sleep(1)
 
 # 로그인 버튼을 찾아서 클릭하기 (로그인 버튼의 Xpath를 복사해서 가져오기)
